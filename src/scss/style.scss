@@ -1,0 +1,294 @@
+// @import "./reset";
+// * {
+//   box-sizing: border-box;
+// }
+
+// :root {
+//   --primary: #0038ff;
+//   --secondary: #e3f5ff;
+//   --text-color: black;
+// }
+@import "./loading-screen";
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.cart-wrapper {
+  position: fixed;
+  z-index: 999;
+  &,
+  .cart-overlay,
+  .cart {
+    top: 0;
+    right: 0;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+  }
+  &.active {
+    &,
+    .cart-overlay {
+      display: unset;
+    }
+    .cart {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  .cart-overlay {
+    position: absolute;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.452);
+    animation: fadeIn 0.3s linear;
+  }
+  .cart {
+    position: absolute;
+    background-color: white;
+    z-index: 1;
+    max-width: 31.25rem;
+    animation: grow 0.3s linear;
+    padding: 1.5rem;
+    font-family: Poppins;
+    &__head {
+      font-weight: 700;
+      font-size: 0.875rem;
+      line-height: 1.1875rem;
+      color: #202020;
+      align-items: center;
+      justify-content: space-between;
+      display: flex;
+      margin-bottom: 1.5rem;
+      &__title {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      &__close-button {
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        &:hover {
+          transform: scale(1.2);
+        }
+        &:active {
+          transform: scale(0.9);
+        }
+      }
+    }
+    &__product {
+      display: flex;
+      align-items: flex-start;
+      width: 100%;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #f5f5f5;
+      border-radius: 0.1875rem;
+      margin-bottom: 1rem;
+      img {
+        width: 100%;
+        max-width: 4.6875rem;
+      }
+      &__info {
+        width: 100%;
+      }
+      &__title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      // &:not(:has(.cart__dropdown)){
+      //   .cart__product__title{
+      //     font-size: 1rem;
+      //   }
+      // }
+    }
+    &__dropdown {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #c2c4c7;
+      border-radius: 5px;
+      padding: 0.7rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      &:not(:last-child) {
+        margin-bottom: 0.5rem;
+      }
+      svg {
+        width: 1rem;
+        transition: 0.3s;
+      }
+      &:hover,
+      &:focus,
+      &.active {
+        border-color: #48494b;
+      }
+      &.active {
+        .cart__dropdown__variants {
+          max-height: 8.4rem;
+          padding: 0.5rem;
+          border: 1px solid #c2c4c7;
+          overflow: auto;
+        }
+      }
+      &__variants {
+        max-height: 0;
+        border: 1px solid transparent;
+        border-top: 0px;
+        border-bottom: 0px;
+        padding: 0 0.5rem;
+        overflow: hidden;
+        position: absolute;
+        z-index: 999;
+        transition: 0.3s;
+        top: calc(100% + 0.3125rem);
+        left: 0;
+        background-color: #f5f5f5;
+        width: 100%;
+        border-radius: 5px;
+        &::-webkit-scrollbar {
+          width: 5px;
+          &-track {
+            border-radius: 8px;
+          }
+          &-thumb {
+            background: var(--primary);
+            border-radius: 8px;
+          }
+        }
+        .button-wrapper {
+          input:checked + label .label-ball span {
+            background-color: var(--primary);
+          }
+          label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            &:hover,
+            &:focus {
+              .label-ball {
+                border-color: var(--primary);
+              }
+            }
+            .label-ball {
+              width: 0.8rem;
+              height: 0.8rem;
+              border-radius: 50%;
+              border: 1px solid black;
+              display: flex;
+              flex-shrink: 0;
+              span {
+                width: 70%;
+                height: 70%;
+                display: block;
+                border-radius: 50%;
+                margin: auto;
+              }
+            }
+          }
+          &:not(:last-child) label {
+            padding-bottom: 0.6rem;
+          }
+        }
+      }
+      &.active {
+        svg {
+          transform: rotate(0.5turn);
+        }
+      }
+    }
+    &__foot {
+      width: 100%;
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      .buy-button {
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        background: #435ebe;
+        border: none;
+        border-radius: 0.3125rem;
+        padding: 0.7rem;
+        cursor: pointer;
+        transition: 0.3s;
+        &:hover,
+        &:focus {
+          transform: scale(1.06);
+        }
+        &:active {
+          transform: scale(0.9);
+        }
+      }
+      .qtty-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        button {
+          padding: 0;
+          margin: 0;
+          border: none;
+          background: #c2c4c7;
+          border-radius: 50%;
+          display: flex;
+          cursor: pointer;
+          transition: 0.3s;
+          &:hover,
+          &:focus {
+            transform: scale(1.1);
+          }
+          &:active {
+            transform: scale(0.9);
+          }
+          svg {
+            fill: white;
+          }
+        }
+        input {
+          max-width: 2rem;
+          border: 1px solid #c2c4c7;
+          border-radius: 3px;
+          font-weight: 700;
+          font-family: Poppins;
+          text-align: center;
+          font-size: 0.8rem;
+          appearance: none;
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            appearance: none;
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
