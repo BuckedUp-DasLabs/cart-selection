@@ -240,39 +240,42 @@ const createCart = (data) => {
     buyButton.toggleAttribute("disabled");
     buy(data);
   });
-
-  const plusBtn = document.createElement("button");
-  plusBtn.classList.add("btn-plus");
-  plusBtn.innerHTML =
-    '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
-
-  const minusBtn = document.createElement("button");
-  minusBtn.classList.add("btn-minus");
-  minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
-
-  const qttyInput = document.createElement("input");
-  qttyInput.id = "cart-qtty-input";
-  qttyInput.value = 1;
-  qttyInput.type = "number";
-  qttyInput.addEventListener("input", () => {
-    if (qttyInput.value <= 0) qttyInput.value = 1;
-  });
-
-  plusBtn.addEventListener("click", () => {
-    qttyInput.value = +qttyInput.value + 1;
-  });
-  minusBtn.addEventListener("click", () => {
-    if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
-  });
-
-  const qttyWrapper = document.createElement("div");
-  qttyWrapper.classList.add("qtty-wrapper");
-
+  
   cartFoot.appendChild(buyButton);
-  qttyWrapper.appendChild(minusBtn);
-  qttyWrapper.appendChild(qttyInput);
-  qttyWrapper.appendChild(plusBtn);
-  cartFoot.appendChild(qttyWrapper);
+
+  if(hasQtty){
+    const plusBtn = document.createElement("button");
+    plusBtn.classList.add("btn-plus");
+    plusBtn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
+  
+    const minusBtn = document.createElement("button");
+    minusBtn.classList.add("btn-minus");
+    minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
+  
+    const qttyInput = document.createElement("input");
+    qttyInput.id = "cart-qtty-input";
+    qttyInput.value = 1;
+    qttyInput.type = "number";
+    qttyInput.addEventListener("input", () => {
+      if (qttyInput.value <= 0) qttyInput.value = 1;
+    });
+  
+    plusBtn.addEventListener("click", () => {
+      qttyInput.value = +qttyInput.value + 1;
+    });
+    minusBtn.addEventListener("click", () => {
+      if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
+    });
+  
+    const qttyWrapper = document.createElement("div");
+    qttyWrapper.classList.add("qtty-wrapper");
+    qttyWrapper.appendChild(minusBtn);
+    qttyWrapper.appendChild(qttyInput);
+    qttyWrapper.appendChild(plusBtn);
+    cartFoot.appendChild(qttyWrapper);
+  }
+
   cart.appendChild(cartFoot);
 
   return cartWrapper;

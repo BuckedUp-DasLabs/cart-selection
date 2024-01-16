@@ -3,6 +3,8 @@ const page_id = "";
 const version_id = "";
 const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
 
+const hasQtty = false;
+
 const productsID = [8685147062578, 8858114064690, 8685145588018, 8858114588978];
 const buyButtonsIds = ["#element-35"];
 const discountCode = "";
