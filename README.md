@@ -24,6 +24,8 @@
   const version_id = "";
   const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
 
+  const hasQtty = false;
+
   const productsID = [999,999];
   const buyButtonsIds = ["#element-"];
   const discountCode = "";
