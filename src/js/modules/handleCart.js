@@ -129,9 +129,11 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
     });
 
     if (!prevSelected || !hasFound){
-      const firstButton = secondaryVariantsWrapper.querySelector("input")
+      const firstButton = secondaryVariantsWrapper.querySelector("input");
+      const newValue = firstButton.getAttribute("label-text");
+      const plusPrice = findPlusPrice(newValue, prod.variants)
       firstButton.checked = true;
-      secondaryDropdown.querySelector("p").innerHTML = firstButton.getAttribute("label-text");
+      secondaryDropdown.querySelector("p").innerHTML = plusPrice ? newValue + ` (${plusPrice})` : newValue;
     } 
   };
 
