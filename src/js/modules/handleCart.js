@@ -216,6 +216,9 @@ const createCart = (data) => {
   cartHead.appendChild(cartTitle);
   cartHead.appendChild(closeCartButton);
   cart.append(cartHead);
+  const cartProductContainer = document.createElement("div");
+  cartProductContainer.classList.add("cart__prod-container");
+  cart.appendChild(cartProductContainer);
 
   [cartOverlay, closeCartButton].forEach((el) => {
     el.addEventListener("click", () => {
@@ -224,7 +227,7 @@ const createCart = (data) => {
   });
 
   data.forEach((prod) => {
-    cart.appendChild(createProduct(prod));
+    cartProductContainer.appendChild(createProduct(prod));
   });
 
   const cartFoot = document.createElement("div");
