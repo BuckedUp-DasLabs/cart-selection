@@ -29,9 +29,9 @@ const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice
 
   if (plusPrice) {
     const labelPrice = document.createElement("span");
-    labelPrice.classList.add("label-price")
-    labelPrice.innerHTML = ` (${plusPrice})`
-    labelText.appendChild(labelPrice)
+    labelPrice.classList.add("label-price");
+    labelPrice.innerHTML = ` (${plusPrice})`;
+    labelText.appendChild(labelPrice);
   }
 
   return [wrapper, button];
@@ -89,24 +89,24 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
     return false;
   });
 
-  const createBase = (option) => {
-    const dropdown = createDropdown(option.values[0]);
+  const createBase = (text) => {
+    const dropdown = createDropdown(text);
     const variantsWrapper = document.createElement("div");
     variantsWrapper.classList.add("cart__dropdown__variants");
     return [dropdown, variantsWrapper];
   };
 
-  const [primaryDropdown, primaryVariantsWrapper] = createBase(primaryOption);
-  const [secondaryDropdown, secondaryVariantsWrapper] = createBase(secondaryOption);
-  primaryVariantsWrapper.setAttribute("primary",prod.id)
-  secondaryDropdown.setAttribute("secondary",prod.id)
+  const [primaryDropdown, primaryVariantsWrapper] = createBase(primaryOption.values[0]);
+  const [secondaryDropdown, secondaryVariantsWrapper] = createBase("SELECT YOUR SIZE");
+  secondaryDropdown.classList.add("not-selected");
+  primaryVariantsWrapper.setAttribute("primary", prod.id);
+  secondaryDropdown.setAttribute("secondary", prod.id);
 
   const findPlusPrice = (value, variants) => {
     for (let variant of variants) {
-      if (variant.title.includes(value))
-        return variant.title.split("(")[1]?.split(")")[0]
+      if (variant.title.includes(value)) return variant.title.split("(")[1]?.split(")")[0];
     }
-  }
+  };
 
   const updateSecondaryOptions = (primarySelected) => {
     const prevSelected = secondaryVariantsWrapper.querySelector(["input:checked"]);
@@ -114,27 +114,28 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
     secondaryVariantsWrapper.innerHTML = "";
     prod.variants.forEach((variant) => {
       const newValue = variant.selectedOptions[1].value;
-      const plusPrice = findPlusPrice(newValue, prod.variants)
+      const plusPrice = findPlusPrice(newValue, prod.variants);
       if (variant.title.includes(primarySelected) && !secondaryVariantsWrapper.innerHTML.includes(newValue)) {
         const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: newValue, plusPrice: plusPrice });
-        button.addEventListener("change",()=>{
-          secondaryDropdown.querySelector("p").innerHTML = plusPrice ? button.getAttribute("label-text") + ` (${plusPrice})` : button.getAttribute("label-text");
-        })
-        if (prevSelected?.id === newValue){
+        button.addEventListener("change", () => {
+          secondaryDropdown.classList.remove("not-selected");
+          secondaryDropdown.classList.remove("shake");
+          secondaryDropdown.querySelector("p").innerHTML = plusPrice
+            ? button.getAttribute("label-text") + ` (${plusPrice})`
+            : button.getAttribute("label-text");
+        });
+        if (prevSelected?.id === newValue) {
           button.checked = true;
-          hasFound = true
-        } 
+          hasFound = true;
+        }
         secondaryVariantsWrapper.appendChild(wrapper);
       }
     });
 
-    if (!prevSelected || !hasFound){
-      const firstButton = secondaryVariantsWrapper.querySelector("input");
-      const newValue = firstButton.getAttribute("label-text");
-      const plusPrice = findPlusPrice(newValue, prod.variants)
-      firstButton.checked = true;
-      secondaryDropdown.querySelector("p").innerHTML = plusPrice ? newValue + ` (${plusPrice})` : newValue;
-    } 
+    if (!prevSelected || !hasFound) {
+      secondaryDropdown.classList.add("not-selected");
+      secondaryDropdown.querySelector("p").innerHTML = "SELECT YOUR SIZE";
+    }
   };
 
   primaryOption.values.forEach((option) => {
@@ -240,21 +241,21 @@ const createCart = (data) => {
   buyButton.innerHTML = "BUY NOW";
   buyButton.addEventListener("click", () => {
     buyButton.toggleAttribute("disabled");
-    buy(data);
+    buy(data, buyButton);
   });
-  
+
   cartFoot.appendChild(buyButton);
 
-  if(hasQtty){
+  if (hasQtty) {
     const plusBtn = document.createElement("button");
     plusBtn.classList.add("btn-plus");
     plusBtn.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
-  
+
     const minusBtn = document.createElement("button");
     minusBtn.classList.add("btn-minus");
     minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
-  
+
     const qttyInput = document.createElement("input");
     qttyInput.id = "cart-qtty-input";
     qttyInput.value = 1;
@@ -262,14 +263,14 @@ const createCart = (data) => {
     qttyInput.addEventListener("input", () => {
       if (qttyInput.value <= 0) qttyInput.value = 1;
     });
-  
+
     plusBtn.addEventListener("click", () => {
       qttyInput.value = +qttyInput.value + 1;
     });
     minusBtn.addEventListener("click", () => {
       if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
     });
-  
+
     const qttyWrapper = document.createElement("div");
     qttyWrapper.classList.add("qtty-wrapper");
     qttyWrapper.appendChild(minusBtn);

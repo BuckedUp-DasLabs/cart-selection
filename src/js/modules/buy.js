@@ -8,12 +8,12 @@ const getVariantId = (data) => {
     const secondaryWrapper = document.querySelector(`[secondary="${data.id}"]`);
     const primary = Array.from(primaryWrapper.querySelectorAll("input")).filter((el) => el.checked)[0];
     const secondary = Array.from(secondaryWrapper.querySelectorAll("input")).filter((el) => el.checked)[0];
-    if (!secondary) return false;
-    return data.variants.filter((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value))[0].id;
+    if (!secondary) return { result: false, wrapper: secondaryWrapper };
+    return { result: data.variants.filter((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value))[0].id };
   } else {
     const input = Array.from(document.querySelectorAll(`[name="${data.id}"]`)).filter((el) => el.checked)[0];
-    if (!input) return false;
-    return input.value;
+    if (!input) return { result: false, wrpper: false };
+    return { result: input.value };
   }
 };
 
@@ -84,7 +84,7 @@ const startPopsixle = (id) => {
 };
 
 //updates order
-const buy = async (data) => { 
+const buy = async (data, button) => {
   //if equals 0, then the data hasnt been fetched yet.
   if (data.length === 0) {
     return;
@@ -97,13 +97,25 @@ const buy = async (data) => {
   const variantId = [];
 
   for (let product of data) {
-    if (product.variants.length > 1) variantId.push(getVariantId(product));
-    else variantId.push(product.variants[0].id);
+    if (product.variants.length > 1) {
+      const selectedVariant = getVariantId(product);
+      if (!selectedVariant.result && !selectedVariant.wrapper) {
+        alert("Sorry, there was a problem.");
+        return;
+      }
+      if (!selectedVariant.result) {
+        selectedVariant.wrapper.classList.add("shake");
+        button.toggleAttribute("disabled");
+        alert("Select your size.");
+        return;
+      }
+      variantId.push(selectedVariant.result);
+    } else variantId.push(product.variants[0].id);
   }
 
   toggleLoading();
 
-  const quantity = +document.getElementById("cart-qtty-input")?.value || 1
+  const quantity = +document.getElementById("cart-qtty-input")?.value || 1;
 
   const obj = variantId.map((variant) => {
     return { variantId: variant, quantity: quantity };
@@ -134,7 +146,7 @@ const buy = async (data) => {
       body: JSON.stringify(body),
     });
     const apiData = await response.json();
-    console.log(apiData)
+    console.log(apiData);
     if (!response.ok) throw new Error("Api Error.");
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     if (discountCode !== "") {
