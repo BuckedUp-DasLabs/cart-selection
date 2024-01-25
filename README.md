@@ -27,6 +27,7 @@
   const hasQtty = false;
 
   const productsID = [999,999];
+  const orderBumpIds = { 999: { price: 4.99, discountCode: "test1" } };
   const buyButtonsIds = ["#element-"];
   const discountCode = "";
 

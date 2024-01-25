@@ -17,10 +17,10 @@ const getVariantId = (data) => {
   }
 };
 
-const addDiscount = async (checkoutId) => {
+const addDiscount = async (checkoutId, code) => {
   const input = {
     checkoutId: checkoutId,
-    discountCode: discountCode,
+    discountCode: code,
   };
   const query = `
     mutation checkoutDiscountCodeApplyV2($checkoutId: ID!, $discountCode: String!) {
@@ -150,7 +150,8 @@ const buy = async (data, button) => {
     if (!response.ok) throw new Error("Api Error.");
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     if (discountCode !== "") {
-      const responseDiscount = await addDiscount(checkoutId);
+      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
+      const responseDiscount = await addDiscount(checkoutId, bumpDiscount || discountCode);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
     }
 

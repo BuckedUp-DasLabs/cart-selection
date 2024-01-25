@@ -18,7 +18,7 @@ const filterVariants = (data, ids) => {
     if (variant) {
       const i = getProdIndex(data, id);
       data[i].variants.edges = data[i].variants.edges.filter((filteredVariant) => filteredVariant.node.id == variant);
-      data[i].availableForSale = data[i].variants.edges[0].node.availableForSale
+      data[i].availableForSale = data[i].variants.edges[0].node.availableForSale;
     }
   });
 };

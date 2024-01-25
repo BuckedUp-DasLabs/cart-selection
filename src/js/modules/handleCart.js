@@ -167,7 +167,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryDropdown);
 };
 
-const createProduct = (prod) => {
+const createProduct = ({ prod, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
 
@@ -191,10 +191,22 @@ const createProduct = (prod) => {
     else handleSimpleProduct({ prod, productInfo, img });
   }
 
+  if (isOrderBump) {
+    const addButton = document.createElement("button");
+    addButton.classList.add("add-button");
+    addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id].price}`;
+    addButton.addEventListener("click", () => {
+      addButton.remove();
+      inCartContainer.appendChild(productWrapper);
+      data.push(prod);
+    });
+    productInfo.appendChild(addButton);
+  }
+
   return productWrapper;
 };
 
-const createCart = (data) => {
+const createCart = (data, orderBumpData) => {
   const cartWrapper = document.createElement("div");
   const cartOverlay = document.createElement("div");
   const cart = document.createElement("div");
@@ -219,9 +231,16 @@ const createCart = (data) => {
   cartHead.appendChild(cartTitle);
   cartHead.appendChild(closeCartButton);
   cart.append(cartHead);
-  const cartProductContainer = document.createElement("div");
-  cartProductContainer.classList.add("cart__prod-container");
-  cart.appendChild(cartProductContainer);
+
+  const productsContainer = document.createElement("div");
+  const inCartContainer = document.createElement("div");
+  const orderBumpsContainer = document.createElement("div");
+  productsContainer.classList.add("cart__prod-container");
+  inCartContainer.classList.add("cart__in-cart-container");
+  orderBumpsContainer.classList.add("cart__order-bumps-container");
+  productsContainer.appendChild(inCartContainer);
+  productsContainer.appendChild(orderBumpsContainer);
+  cart.appendChild(productsContainer);
 
   [cartOverlay, closeCartButton].forEach((el) => {
     el.addEventListener("click", () => {
@@ -230,7 +249,10 @@ const createCart = (data) => {
   });
 
   data.forEach((prod) => {
-    cartProductContainer.appendChild(createProduct(prod));
+    inCartContainer.appendChild(createProduct({ prod }));
+  });
+  orderBumpData.forEach((prod) => {
+    orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
   });
 
   const cartFoot = document.createElement("div");

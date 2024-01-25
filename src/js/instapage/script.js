@@ -5,9 +5,10 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = [8858114588978];
+const productsID = [8685147062578, 8685143195954];
+const orderBumpIds = { 8858113868082: { price: 4.99, discountCode: "test1" } };
 const buyButtonsIds = ["#element-35"];
-const discountCode = "";
+const discountCode = "test";
 
 //stop here.
 const urlParams = new URLSearchParams(window.location.search);
