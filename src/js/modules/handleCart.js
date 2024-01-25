@@ -48,6 +48,7 @@ const createDropdown = (title) => {
   dropdown.appendChild(p);
   dropdown.insertAdjacentHTML("beforeend", svg);
   dropdown.addEventListener("click", (e) => {
+    dropdown.classList.remove("shake");
     if (e.target.tagName !== "INPUT") dropdown.classList.toggle("active");
   });
   document.addEventListener("click", (e) => {
@@ -119,7 +120,6 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
         const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: newValue, plusPrice: plusPrice });
         button.addEventListener("change", () => {
           secondaryDropdown.classList.remove("not-selected");
-          secondaryDropdown.classList.remove("shake");
           secondaryDropdown.querySelector("p").innerHTML = plusPrice
             ? button.getAttribute("label-text") + ` (${plusPrice})`
             : button.getAttribute("label-text");
