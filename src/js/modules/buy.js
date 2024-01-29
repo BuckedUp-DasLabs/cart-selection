@@ -150,9 +150,13 @@ const buy = async (data, button) => {
     if (!response.ok) throw new Error("Api Error.");
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     if (discountCode !== "") {
-      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
-      const responseDiscount = await addDiscount(checkoutId, bumpDiscount || discountCode);
+      const responseDiscount = await addDiscount(checkoutId, discountCode);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
+      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
+      if(bumpDiscount){
+        const responseBumpDiscount = await addDiscount(checkoutId, bumpDiscount);
+        if (!responseBumpDiscount.ok) throw new Error("Api Bump Discount Error.");
+      }
     }
 
     startPopsixle(checkoutId.split("?key=")[1]);
