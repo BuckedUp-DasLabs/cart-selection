@@ -45,6 +45,12 @@
 <script src="https://cdn.jsdelivr.net/gh/BuckedUp-DasLabs/cart-selection@latest/src/js/scripts.js" type="module"></script>
 ```
 
+You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
+ex:
+```
+const productsID = ["999-877","999-877-858",""999-whole-877-858""];
+```
+
 ## How to compile scss
 
 ### either install the compiler from the sass website, or install the vscode extension live sass compiler.
