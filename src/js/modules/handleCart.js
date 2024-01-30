@@ -167,7 +167,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryDropdown);
 };
 
-const createProduct = ({ prod, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
+const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
 
@@ -175,17 +175,28 @@ const createProduct = ({ prod, isOrderBump = false, inCartContainer = undefined,
   productInfo.classList.add("cart__product__info");
 
   const img = document.createElement("img");
-  img.src = prod.variants[0].image.src;
-  img.alt = prod.variants[0].title;
+  if(isVariant){
+    img.src = prod.image.src;
+    img.alt = prod.title;
+  }else{
+    img.src = prod.variants[0].image.src;
+    img.alt = prod.variants[0].title;
+  }
 
   const title = document.createElement("p");
   title.classList.add("cart__product__title");
-  title.innerHTML = prod.title;
+  title.innerHTML = isVariant || prod.title
+  productInfo.appendChild(title);
+  if(isVariant){
+    const variantTitle = document.createElement("p")
+    variantTitle.classList.add("cart__product__variant-title");
+    variantTitle.innerHTML = prod.title
+    productInfo.appendChild(variantTitle);
+  }
 
   productWrapper.appendChild(img);
   productWrapper.appendChild(productInfo);
-  productInfo.appendChild(title);
-  if (prod.variants.length > 1 && !prod.isWhole) {
+  if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
     else handleSimpleProduct({ prod, productInfo, img });
   }
@@ -248,7 +259,13 @@ const createCart = (data, orderBumpData) => {
   });
 
   data.forEach((prod) => {
-    inCartContainer.appendChild(createProduct({ prod }));
+    console.log(prod)
+    if (prod.isWhole){
+      prod.variants.forEach(variant=>{
+        inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }))
+      })
+    } 
+    else inCartContainer.appendChild(createProduct({ prod }));
   });
   orderBumpData.forEach((prod) => {
     orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));

@@ -132,10 +132,13 @@
       &__info {
         width: 100%;
       }
-      &__title {
+      &__title,&__variant-title {
         font-weight: 700;
         font-size: 1rem;
         margin-bottom: 0.5rem;
+      }
+      &__variant-title{
+        color:rgb(88, 88, 88);
       }
       // &:not(:has(.cart__dropdown)){
       //   .cart__product__title{
