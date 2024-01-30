@@ -97,7 +97,9 @@ const buy = async (data, button) => {
   const variantId = [];
 
   for (let product of data) {
-    if (product.variants.length > 1) {
+    if (product.isWhole) {
+      variantId.push(...product.variants.map((variant) => variant.id));
+    } else if (product.variants.length > 1) {
       const selectedVariant = getVariantId(product);
       if (!selectedVariant.result && !selectedVariant.wrapper) {
         alert("Sorry, there was a problem.");
@@ -153,7 +155,7 @@ const buy = async (data, button) => {
       const responseDiscount = await addDiscount(checkoutId, discountCode);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
       const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
-      if(bumpDiscount){
+      if (bumpDiscount) {
         const responseBumpDiscount = await addDiscount(checkoutId, bumpDiscount);
         if (!responseBumpDiscount.ok) throw new Error("Api Bump Discount Error.");
       }

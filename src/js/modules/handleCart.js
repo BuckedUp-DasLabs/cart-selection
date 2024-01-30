@@ -185,8 +185,7 @@ const createProduct = ({ prod, isOrderBump = false, inCartContainer = undefined,
   productWrapper.appendChild(img);
   productWrapper.appendChild(productInfo);
   productInfo.appendChild(title);
-
-  if (prod.variants.length > 1) {
+  if (prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
     else handleSimpleProduct({ prod, productInfo, img });
   }
