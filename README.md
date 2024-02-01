@@ -12,7 +12,16 @@
     --text-color: black;
   }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/BuckedUp-DasLabs/cart-selection@latest/src/scss/style.css" />
+<script>
+  const getCdnStyle = () =>{
+    const cdnStyle = document.createElement("link");
+    cdnStyle.rel = "stylesheet";
+    const currentTime = Math.floor(+new Date() / (60 * 60 * 1000))
+    cdnStyle.href = `https://cdn.jsdelivr.net/gh/BuckedUp-DasLabs/cart-selection@latest/src/scss/style.css?t=${currentTime}`
+    document.head.appendChild(cdnStyle)
+  }
+  getCdnStyle();
+</script>
 ```
 
 ### 2. Place this code and change as necessary into html/css footer
@@ -41,12 +50,20 @@
     document.cookie = `${param}=${urlParams.get(param)};${cookieConfig}`;
   });
   localStorage.setItem("first_page", origin);
+  const getCdnScript = () =>{
+    const cdnScript = document.createElement("script");
+    cdnScript.type = "module";
+    const currentTime = Math.floor(+new Date() / (60 * 60 * 1000))
+    cdnScript.src = `https://cdn.jsdelivr.net/gh/BuckedUp-DasLabs/cart-selection@latest/src/js/scripts.js?t=${currentTime}`
+    document.body.appendChild(cdnScript)
+  }
+  getCdnScript();
 </script>
-<script src="https://cdn.jsdelivr.net/gh/BuckedUp-DasLabs/cart-selection@latest/src/js/scripts.js" type="module"></script>
 ```
 
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
 ex:
+
 ```
 const productsID = ["999-877","999-877-858",""999-whole-877-858""];
 ```
