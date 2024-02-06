@@ -98,10 +98,10 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   };
 
   const [primaryDropdown, primaryVariantsWrapper] = createBase(primaryOption.values[0]);
-  const [secondaryDropdown, secondaryVariantsWrapper] = createBase("SELECT YOUR SIZE");
-  secondaryDropdown.classList.add("not-selected");
+  const secondaryVariantsWrapper = document.createElement("div");
+  secondaryVariantsWrapper.classList.add("cart__secondary-wrapper");
   primaryVariantsWrapper.setAttribute("primary", prod.id);
-  secondaryDropdown.setAttribute("secondary", prod.id);
+  secondaryVariantsWrapper.setAttribute("secondary", prod.id);
 
   const findPlusPrice = (value, variants) => {
     for (let variant of variants) {
@@ -109,33 +109,56 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
     }
   };
 
+  const getNewName = (value) => {
+    switch (value) {
+      case "Small":
+        return "S";
+      case "Medium":
+        return "M";
+      case "Large":
+        return "L";
+      case "X-Large":
+        return "XL";
+      default:
+        return value;
+    }
+  };
+
+  const placeHolders = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => {
+    const wrapper = document.createElement("div");
+    const textWrapper = document.createElement("div");
+    const text = document.createElement("span");
+    wrapper.classList.add("button-wrapper");
+    wrapper.classList.add("button-wrapper--placeholder");
+    textWrapper.classList.add("placeholder__text-wrapper");
+    text.classList.add("label-text");
+    text.innerHTML = size;
+    text.setAttribute("size", size);
+    wrapper.appendChild(textWrapper);
+    textWrapper.appendChild(text);
+    return wrapper;
+  });
+
   const updateSecondaryOptions = (primarySelected) => {
     const prevSelected = secondaryVariantsWrapper.querySelector(["input:checked"]);
-    let hasFound = false;
     secondaryVariantsWrapper.innerHTML = "";
+    placeHolders.forEach((placeholder) => secondaryVariantsWrapper.appendChild(placeholder));
     prod.variants.forEach((variant) => {
       const newValue = variant.selectedOptions[1].value;
       const plusPrice = findPlusPrice(newValue, prod.variants);
-      if (variant.title.includes(primarySelected) && !secondaryVariantsWrapper.innerHTML.includes(newValue)) {
-        const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: newValue, plusPrice: plusPrice });
+      if (variant.title.includes(primarySelected) && !secondaryVariantsWrapper.querySelector("label")?.innerHTML.includes(newValue)) {
+        const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: getNewName(newValue), plusPrice: plusPrice });
         button.addEventListener("change", () => {
-          secondaryDropdown.classList.remove("not-selected");
-          secondaryDropdown.querySelector("p").innerHTML = plusPrice
-            ? button.getAttribute("label-text") + ` (${plusPrice})`
-            : button.getAttribute("label-text");
+          secondaryVariantsWrapper.classList.remove("shake");
         });
         if (prevSelected?.id === newValue) {
           button.checked = true;
-          hasFound = true;
         }
-        secondaryVariantsWrapper.appendChild(wrapper);
+        const placeholder = placeHolders.find((placeHolder) => placeHolder.querySelector(`[size="${getNewName(newValue)}"]`));
+        secondaryVariantsWrapper.insertBefore(wrapper, placeholder);
+        placeholder.remove();
       }
     });
-
-    if (!prevSelected || !hasFound) {
-      secondaryDropdown.classList.add("not-selected");
-      secondaryDropdown.querySelector("p").innerHTML = "SELECT YOUR SIZE";
-    }
   };
 
   primaryOption.values.forEach((option) => {
@@ -161,10 +184,9 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   primaryDropdown.appendChild(primaryVariantsWrapper);
 
   updateSecondaryOptions(primaryOption.values[0]);
-  secondaryDropdown.appendChild(secondaryVariantsWrapper);
 
   productInfo.appendChild(primaryDropdown);
-  productInfo.appendChild(secondaryDropdown);
+  productInfo.appendChild(secondaryVariantsWrapper);
 };
 
 const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
@@ -175,22 +197,22 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   productInfo.classList.add("cart__product__info");
 
   const img = document.createElement("img");
-  if(isVariant){
+  if (isVariant) {
     img.src = prod.image.src;
     img.alt = prod.title;
-  }else{
+  } else {
     img.src = prod.variants[0].image.src;
     img.alt = prod.variants[0].title;
   }
 
   const title = document.createElement("p");
   title.classList.add("cart__product__title");
-  title.innerHTML = isVariant || prod.title
+  title.innerHTML = isVariant || prod.title;
   productInfo.appendChild(title);
-  if(isVariant){
-    const variantTitle = document.createElement("p")
+  if (isVariant) {
+    const variantTitle = document.createElement("p");
     variantTitle.classList.add("cart__product__variant-title");
-    variantTitle.innerHTML = prod.title
+    variantTitle.innerHTML = prod.title;
     productInfo.appendChild(variantTitle);
   }
 
@@ -259,13 +281,11 @@ const createCart = (data, orderBumpData) => {
   });
 
   data.forEach((prod) => {
-    console.log(prod)
-    if (prod.isWhole){
-      prod.variants.forEach(variant=>{
-        inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }))
-      })
-    } 
-    else inCartContainer.appendChild(createProduct({ prod }));
+    if (prod.isWhole) {
+      prod.variants.forEach((variant) => {
+        inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
+      });
+    } else inCartContainer.appendChild(createProduct({ prod }));
   });
   orderBumpData.forEach((prod) => {
     orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));

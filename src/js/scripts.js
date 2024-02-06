@@ -12,9 +12,7 @@ const main = async () => {
   toggleLoading();
   const [data, orderBumpData] = await Promise.all([fetchProduct({ ids: productsID }), fetchProduct({ ids: Object.keys(orderBumpIds) })]);
   dataLayerStart(data);
-  const noStock = (el) => {
-    return !el.availableForSale;
-  };
+  const noStock = (el) => !el.availableForSale;
   if (data.some(noStock)) {
     alert("Product not found.");
     window.location.href = "https://buckedup.com";

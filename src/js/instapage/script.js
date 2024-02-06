@@ -5,8 +5,8 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = ["8685145588018-whole-46753449673010-46753449640242-46753449574706-46753449804082", 8685143195954];
-const orderBumpIds = { 8858113868082: { price: 4.99, discountCode: "KSUPGRADE" } };
+const productsID = [8858114588978];
+const orderBumpIds = {};
 const buyButtonsIds = ["#element-35"];
 const discountCode = "";
 
