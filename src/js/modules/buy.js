@@ -18,28 +18,38 @@ const getVariantId = (data) => {
 };
 
 const addDiscount = async (checkoutId, code) => {
-  const input = {
-    checkoutId: checkoutId,
-    discountCode: code,
-  };
-  const query = `
-    mutation checkoutDiscountCodeApplyV2($checkoutId: ID!, $discountCode: String!) {
-      checkoutDiscountCodeApplyV2(checkoutId: $checkoutId, discountCode: $discountCode) {
-        checkout {
-          id
-          webUrl
+  const postDiscount = async (code) => {
+    const input = {
+      checkoutId: checkoutId,
+      discountCode: code,
+    };
+    const query = `
+      mutation checkoutDiscountCodeApplyV2($checkoutId: ID!, $discountCode: String!) {
+        checkoutDiscountCodeApplyV2(checkoutId: $checkoutId, discountCode: $discountCode) {
+          checkout {
+            id
+            webUrl
+          }
         }
       }
-    }
-  `;
-  const body = {
-    query: query,
-    variables: input,
+    `;
+    const body = {
+      query: query,
+      variables: input,
+    };
+    const response = await fetch(fetchUrl, {
+      ...apiOptions,
+      body: JSON.stringify(body),
+    });
+    return response;
   };
-  const response = await fetch(fetchUrl, {
-    ...apiOptions,
-    body: JSON.stringify(body),
-  });
+
+  let response;
+  for (let indivCode of code.split("-")) {
+    response = await postDiscount(indivCode);
+    if (!response.ok) return response;
+  }
+
   return response;
 };
 
@@ -152,13 +162,13 @@ const buy = async (data, button) => {
     if (!response.ok) throw new Error("Api Error.");
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     if (discountCode !== "") {
-      const responseDiscount = await addDiscount(checkoutId, discountCode);
-      if (!responseDiscount.ok) throw new Error("Api Discount Error.");
+      let discount = discountCode;
       const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
       if (bumpDiscount) {
-        const responseBumpDiscount = await addDiscount(checkoutId, bumpDiscount);
-        if (!responseBumpDiscount.ok) throw new Error("Api Bump Discount Error.");
+        discount = `${discount}-${bumpDiscount}`
       }
+      const responseDiscount = await addDiscount(checkoutId, discount);
+      if (!responseDiscount.ok) throw new Error("Api Discount Error.");
     }
 
     startPopsixle(checkoutId.split("?key=")[1]);

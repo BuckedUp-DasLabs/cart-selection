@@ -61,6 +61,9 @@
 </script>
 ```
 
+You can add more than one discountCode by using "-".
+ex: "code1-code2"
+
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
 ex:
 
