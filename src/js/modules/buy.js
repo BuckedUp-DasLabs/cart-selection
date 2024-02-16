@@ -163,7 +163,7 @@ const buy = async (data, button) => {
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     if (discountCode !== "") {
       let discount = discountCode;
-      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
+      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id.split("ob")[0] in orderBumpIds)?.id.split("ob")[0]]?.discountCode;
       if (bumpDiscount) {
         discount = `${discount}-${bumpDiscount}`;
       }
