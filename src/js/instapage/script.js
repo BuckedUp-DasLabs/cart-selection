@@ -5,8 +5,8 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = [8858114588978];
-const orderBumpIds = {};
+const productsID = ["8685147062578-46753455505714-46753455374642", 9037941342514];
+const orderBumpIds = { 8685147062578: { price: 0, title: "shaker2" } };
 const buyButtonsIds = ["#element-35"];
 const discountCode = "";
 

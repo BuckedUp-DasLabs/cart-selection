@@ -57,7 +57,7 @@ const createDropdown = (title) => {
   return dropdown;
 };
 
-const handleSimpleProduct = ({ prod, productInfo, img }) => {
+const handleSimpleProduct = ({ prod, productInfo, img, isOrderBump }) => {
   const dropdown = createDropdown(prod.variants[0].title);
   const variantsWrapper = document.createElement("div");
   variantsWrapper.classList.add("cart__dropdown__variants");
@@ -65,7 +65,7 @@ const handleSimpleProduct = ({ prod, productInfo, img }) => {
   prod.variants.forEach((variant) => {
     const [wrapper, button] = createButton({
       productId: prod.id,
-      variantId: variant.id,
+      variantId: variant.id + (isOrderBump ? "ob" : ""),
       text: variant.title,
       variantPrice: variant.price.amount,
     });
@@ -220,13 +220,13 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   productWrapper.appendChild(productInfo);
   if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
-    else handleSimpleProduct({ prod, productInfo, img });
+    else handleSimpleProduct({ prod, productInfo, img, isOrderBump });
   }
 
   if (isOrderBump) {
     const addButton = document.createElement("button");
     addButton.classList.add("add-button");
-    addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id].price}`;
+    addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id.split("ob")[0]].price}`;
     addButton.addEventListener("click", () => {
       addButton.remove();
       inCartContainer.appendChild(productWrapper);

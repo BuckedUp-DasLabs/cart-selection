@@ -1,6 +1,6 @@
 import { apiOptions, fetchUrl } from "../../variables.js";
 
-const filterVariants = (data, ids) => {
+const filterVariants = (data, ids, isOrderBump) => {
   const getVariants = (id) => {
     const idStart = "gid://shopify/ProductVariant/";
     if (typeof id == "string" && id.includes("-")) {
@@ -8,37 +8,45 @@ const filterVariants = (data, ids) => {
       const idsArray = id.split("-");
       let i = idsArray[1].includes("whole") ? 2 : 1;
       for (i; i < idsArray.length; i++) {
-        filteredIds.push(idStart + idsArray[i].replace("-", ""));
+        filteredIds.push(idStart + idsArray[i]);
       }
       return { ids: filteredIds, isWhole: idsArray[1].includes("whole") };
     }
     return { ids: null };
   };
 
-  const getProdIndex = (data, id) => {
-    id = id.split("-")[0];
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].id.includes(id)) return i;
+  const isNotAvailable = (variant) => variant.node.availableForSale === false;
+  const isAvailable = (variant) => variant.node.availableForSale === true;
+
+  const addCustomTitle = (id) => {
+    if ("title" in orderBumpIds[id]) {
+      data.find((prod) => prod.id.includes(id)).title = orderBumpIds[id].title;
     }
   };
 
-  const isAvailable = (variant) => variant.node.availableForSale === false;
-  const isAvailableWhole = (variant) => variant.node.availableForSale === true;
+  const setIsOrderBump = (id) => {
+    if (isOrderBump) {
+      const prod = data.find((prod) => prod.id.includes(id));
+      prod.id = prod.id + "ob";
+      addCustomTitle(id);
+    }
+  };
 
   ids.forEach((id) => {
+    setIsOrderBump(id);
     const variants = getVariants(id);
     if (variants.ids) {
-      const i = getProdIndex(data, id);
-      data[i].variants.edges = data[i].variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
+      const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
+      prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {
-        data[i].availableForSale = data[i].variants.edges.every(isAvailableWhole);
-        data[i].isWhole = true;
-      } else data[i].availableForSale = !data[i].variants.edges.every(isAvailable);
+        prod.availableForSale = prod.variants.edges.every(isAvailable);
+        prod.isWhole = true;
+      } else prod.availableForSale = !prod.variants.edges.every(isNotAvailable);
     }
   });
 };
 
-const fetchProduct = async ({ ids }) => {
+const fetchProduct = async ({ ids, isOrderBump = false }) => {
   const query = `
   { 
     nodes(ids: [${ids.map((id) => `"gid://shopify/Product/${id}"`)}]) {
@@ -88,23 +96,23 @@ const fetchProduct = async ({ ids }) => {
       throw new Error("Error Fetching Api.");
     }
     data = data.data.nodes;
-    filterVariants(data, ids);
+    filterVariants(data, ids, isOrderBump);
 
-    data.forEach((obj) => {
-      if (!obj.availableForSale) console.log("Out of stock: ", obj.id, obj.title);
-      obj.id = obj.id.split("/").slice(-1)[0];
+    data.forEach((prod) => {
+      if (!prod.availableForSale) console.log("Out of stock: ", prod.id, prod.title);
+      prod.id = prod.id.split("/").slice(-1)[0];
 
-      obj.variants = obj.variants.edges.filter((edge) => edge.node.availableForSale || (!edge.node.availableForSale && edge.node["last-variant"]));
+      prod.variants = prod.variants.edges.filter((edge) => edge.node.availableForSale);
       let minPrice = 99999;
-      for (let key in obj.variants) {
-        obj.variants[key] = obj.variants[key].node;
-        obj.variants[key].title = obj.variants[key].title.split("(")[0];
-        if (+obj.variants[key].price.amount < minPrice) minPrice = obj.variants[key].price.amount;
+      for (let key in prod.variants) {
+        prod.variants[key] = prod.variants[key].node;
+        prod.variants[key].title = prod.variants[key].title.split("(")[0];
+        if (+prod.variants[key].price.amount < minPrice) minPrice = prod.variants[key].price.amount;
       }
-      for (let key in obj.variants) {
-        if (+obj.variants[key].price.amount > minPrice) {
-          const string = ` (+$${(obj.variants[key].price.amount - minPrice).toFixed(2)})`;
-          obj.variants[key].title = obj.variants[key].title + string;
+      for (let key in prod.variants) {
+        if (+prod.variants[key].price.amount > minPrice) {
+          const string = ` (+$${(prod.variants[key].price.amount - minPrice).toFixed(2)})`;
+          prod.variants[key].title = prod.variants[key].title + string;
         }
       }
     });

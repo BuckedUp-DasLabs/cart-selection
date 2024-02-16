@@ -6,12 +6,12 @@ const getVariantId = (data) => {
   const primaryWrapper = document.querySelector(`[primary="${data.id}"]`);
   if (primaryWrapper) {
     const secondaryWrapper = document.querySelector(`[secondary="${data.id}"]`);
-    const primary = Array.from(primaryWrapper.querySelectorAll("input")).filter((el) => el.checked)[0];
-    const secondary = Array.from(secondaryWrapper.querySelectorAll("input")).filter((el) => el.checked)[0];
+    const primary = primaryWrapper.querySelector("input:checked");
+    const secondary = secondaryWrapper.querySelector("input:checked");
     if (!secondary) return { result: false, wrapper: secondaryWrapper };
-    return { result: data.variants.filter((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value))[0].id };
+    return { result: data.variants.find((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value)).id };
   } else {
-    const input = Array.from(document.querySelectorAll(`[name="${data.id}"]`)).filter((el) => el.checked)[0];
+    const input = document.querySelector(`[name="${data.id}"]:checked`);
     if (!input) return { result: false, wrpper: false };
     return { result: input.value };
   }
@@ -165,7 +165,7 @@ const buy = async (data, button) => {
       let discount = discountCode;
       const bumpDiscount = orderBumpIds[data.find((prod) => prod.id in orderBumpIds)?.id]?.discountCode;
       if (bumpDiscount) {
-        discount = `${discount}-${bumpDiscount}`
+        discount = `${discount}-${bumpDiscount}`;
       }
       const responseDiscount = await addDiscount(checkoutId, discount);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
