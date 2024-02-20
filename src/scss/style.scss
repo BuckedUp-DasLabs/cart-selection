@@ -1,13 +1,13 @@
-// @import "./reset";
-// * {
-//   box-sizing: border-box;
-// }
+@import "./reset";
+* {
+  box-sizing: border-box;
+}
 
-// :root {
-//   --primary: #0038ff;
-//   --secondary: #e3f5ff;
-//   --text-color: black;
-// }
+:root {
+  --primary: #0038ff;
+  --secondary: #e3f5ff;
+  --text-color: black;
+}
 @import "./loading-screen";
 
 .no-scroll {
@@ -255,17 +255,18 @@
     }
     &__secondary-wrapper {
       display: flex;
-      gap:0.3rem;
-      @media(max-width:432px){
+      gap: 0.3rem;
+      @media (max-width: 432px) {
         display: grid;
-        grid-template-columns: repeat(6,1fr);
+        grid-template-columns: repeat(6, 1fr);
       }
       .button-wrapper {
         width: 100%;
         .label-ball {
           display: none;
         }
-        label,.placeholder__text-wrapper {
+        label,
+        .placeholder__text-wrapper {
           display: flex;
           aspect-ratio: 1/1;
           width: 100%;
@@ -275,7 +276,8 @@
           background-color: #ececec;
           border: 2px solid #ececec;
           cursor: pointer;
-          &:hover,&:focus{
+          &:hover,
+          &:focus {
             border-color: var(--primary);
           }
           padding: 0.25rem;
@@ -284,7 +286,7 @@
             font-size: 0.8125rem;
             line-height: 1;
             font-weight: 700;
-            margin:auto;
+            margin: auto;
             .label-price {
               position: absolute;
               top: 100%;
@@ -300,27 +302,29 @@
           border-color: var(--primary);
           background-color: var(--secondary);
         }
-        &--placeholder{
-          .placeholder__text-wrapper{
-            color:#808080;
+        &--placeholder {
+          .placeholder__text-wrapper {
+            color: #808080;
             cursor: not-allowed;
-            position:relative;
-            &:after,&:before{
-              content:"";
+            position: relative;
+            &:after,
+            &:before {
+              content: "";
               width: 100%;
               height: 1px;
               background-color: #f00;
-              position:absolute;
-              top:50%;
+              position: absolute;
+              top: 50%;
             }
-            &:after{
+            &:after {
               transform: rotate(45deg);
             }
-            &:before{
+            &:before {
               transform: rotate(-45deg);
             }
-            &:hover,&:focus{
-              border-color:#ececec;
+            &:hover,
+            &:focus {
+              border-color: #ececec;
             }
           }
         }

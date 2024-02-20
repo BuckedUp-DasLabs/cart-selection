@@ -15,10 +15,10 @@ const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice
   wrapper.classList.add("button-wrapper");
   labelText.classList.add("label-text");
   labelBall.classList.add("label-ball");
-  label.setAttribute("for", `${variantId}`);
+  label.setAttribute("for", `${productId}-${variantId}`);
   label.setAttribute("role", "button");
   labelText.innerHTML = text;
-  button.id = `${variantId}`;
+  button.id = `${productId}-${variantId}`;
   button.value = `${variantId}`;
   button.type = "radio";
   button.setAttribute("hidden", "");
@@ -65,7 +65,7 @@ const handleSimpleProduct = ({ prod, productInfo, img, isOrderBump }) => {
   prod.variants.forEach((variant) => {
     const [wrapper, button] = createButton({
       productId: prod.id,
-      variantId: variant.id + (isOrderBump ? "ob" : ""),
+      variantId: variant.id,
       text: variant.title,
       variantPrice: variant.price.amount,
     });
@@ -276,31 +276,16 @@ const createCart = (data, orderBumpData) => {
 
   [cartOverlay, closeCartButton].forEach((el) => {
     el.addEventListener("click", () => {
-      toggleCart(cartWrapper);
+      cartWrapper.classList.toggle("active");
     });
-  });
-
-  data.forEach((prod) => {
-    if (prod.isWhole) {
-      prod.variants.forEach((variant) => {
-        inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
-      });
-    } else inCartContainer.appendChild(createProduct({ prod }));
-  });
-  orderBumpData.forEach((prod) => {
-    orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
   });
 
   const cartFoot = document.createElement("div");
   cartFoot.classList.add("cart__foot");
 
-  const buyButton = document.createElement("button");
+  let buyButton = document.createElement("button");
   buyButton.classList.add("buy-button");
   buyButton.innerHTML = "BUY NOW";
-  buyButton.addEventListener("click", () => {
-    buyButton.toggleAttribute("disabled");
-    buy(data, buyButton);
-  });
 
   cartFoot.appendChild(buyButton);
 
@@ -339,12 +324,35 @@ const createCart = (data, orderBumpData) => {
 
   cart.appendChild(cartFoot);
 
-  return cartWrapper;
+  const replaceElement = (el) => {
+    const elClone = el.cloneNode(true);
+    el.parentNode.replaceChild(elClone, el);
+    return elClone;
+  };
+
+  const updateCartProducts = (data, btnDiscount) => {
+    inCartContainer.innerHTML = "";
+    orderBumpsContainer.innerHTML = "";
+    buyButton = replaceElement(buyButton);
+    data.forEach((prod) => {
+      if (prod.isWhole) {
+        prod.variants.forEach((variant) => {
+          inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
+        });
+      } else inCartContainer.appendChild(createProduct({ prod }));
+    });
+    orderBumpData.forEach((prod) => {
+      orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
+    });
+    buyButton.addEventListener("click", async () => {
+      buyButton.toggleAttribute("disabled");
+      const result = await buy(data, btnDiscount);
+      if (!result) buyButton.toggleAttribute("disabled");
+    });
+    cartWrapper.classList.toggle("active");
+  };
+
+  return updateCartProducts;
 };
 
-const toggleCart = (cartWrapper) => {
-  cartWrapper.classList.toggle("active");
-  document.body.classList.toggle("no-scroll");
-};
-
-export { toggleCart, createCart };
+export { createCart };

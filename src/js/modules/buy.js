@@ -12,7 +12,7 @@ const getVariantId = (data) => {
     return { result: data.variants.find((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value)).id };
   } else {
     const input = document.querySelector(`[name="${data.id}"]:checked`);
-    if (!input) return { result: false, wrpper: false };
+    if (!input) return { result: false, wrapper: false };
     return { result: input.value };
   }
 };
@@ -94,18 +94,8 @@ const startPopsixle = (id) => {
 };
 
 //updates order
-const buy = async (data, button) => {
-  //if equals 0, then the data hasnt been fetched yet.
-  if (data.length === 0) {
-    return;
-  }
-  //if null, the api wasnt able to return the data.
-  if (data == null) {
-    return;
-  }
-
+const buy = async (data, btnDiscount) => {
   const variantId = [];
-
   for (let product of data) {
     if (product.isWhole) {
       variantId.push(...product.variants.map((variant) => variant.id));
@@ -113,13 +103,12 @@ const buy = async (data, button) => {
       const selectedVariant = getVariantId(product);
       if (!selectedVariant.result && !selectedVariant.wrapper) {
         alert("Sorry, there was a problem.");
-        return;
+        return false;
       }
       if (!selectedVariant.result) {
         selectedVariant.wrapper.classList.add("shake");
-        button.toggleAttribute("disabled");
         alert("Select your size.");
-        return;
+        return false;
       }
       variantId.push(selectedVariant.result);
     } else variantId.push(product.variants[0].id);
@@ -161,12 +150,15 @@ const buy = async (data, button) => {
     console.log(apiData);
     if (!response.ok) throw new Error("Api Error.");
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
-    if (discountCode !== "") {
-      let discount = discountCode;
-      const bumpDiscount = orderBumpIds[data.find((prod) => prod.id.split("ob")[0] in orderBumpIds)?.id.split("ob")[0]]?.discountCode;
-      if (bumpDiscount) {
-        discount = `${discount}-${bumpDiscount}`;
-      }
+    const bumpDiscount = orderBumpIds[data.find((prod) => prod.id.includes("ob"))?.id.split("ob")[0]]?.discountCode;
+    if (discountCode !== "" || btnDiscount || bumpDiscount) {
+      let discount;
+      if (discountCode || btnDiscount) {
+        discount = btnDiscount || discountCode;
+        if (bumpDiscount) {
+          discount = `${discount}-${bumpDiscount}`;
+        }
+      } else discount = bumpDiscount;
       const responseDiscount = await addDiscount(checkoutId, discount);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
     }
@@ -185,6 +177,7 @@ const buy = async (data, button) => {
 
     dataLayerRedirect(data);
     window.location.href = apiData.data.checkoutCreate.checkout.webUrl;
+    return true;
   } catch (error) {
     alert("There was a problem. Please try again later.");
     console.log(error);

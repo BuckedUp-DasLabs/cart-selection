@@ -5,9 +5,13 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = ["8685147062578-46753455505714-46753455374642", 9037941342514];
-const orderBumpIds = { 8685147062578: { price: 0, title: "shaker2" } };
-const buyButtonsIds = ["#element-35"];
+const productsID = [8820417003826, 8858111377714, 8768929825074];
+const orderBumpIds = { 8820417003826: { title: "test", price: 10.99 } };
+const buyButtonsIds = [
+  { id: "#BTN-1", products: '{"8820417003826": {"quantity": 1},"8858111377714": {"quantity": 1}}', discountCode: "1boost" },
+  { id: "#BTN-2", products: '{"8820417003826": {"quantity": 2},"8858111377714": {"quantity": 1}}', discountCode: "2boost" },
+  { id: "#BTN-3", products: '{"8820417003826": {"quantity": 4},"8858111377714": {"quantity": 1}, "8768929825074": {"quantity": 1}}', discountCode: "4boost" },
+];
 const discountCode = "";
 
 //stop here.
