@@ -98,7 +98,11 @@ const buy = async (data, btnDiscount) => {
   const variantId = [];
   for (let product of data) {
     if (product.isWhole) {
-      variantId.push(...product.variants.map((variant) => variant.id));
+      variantId.push(
+        ...product.variants.map((variant) => {
+          return { id: variant.id };
+        })
+      );
     } else if (product.variants.length > 1) {
       const selectedVariant = getVariantId(product);
       if (!selectedVariant.result && !selectedVariant.wrapper) {
@@ -110,8 +114,8 @@ const buy = async (data, btnDiscount) => {
         alert("Select your size.");
         return false;
       }
-      variantId.push(selectedVariant.result);
-    } else variantId.push(product.variants[0].id);
+      variantId.push({ id: selectedVariant.result, quantity: +product.quantity });
+    } else variantId.push({id: product.variants[0].id, quantity: +product.quantity});
   }
 
   toggleLoading();
@@ -119,7 +123,7 @@ const buy = async (data, btnDiscount) => {
   const quantity = +document.getElementById("cart-qtty-input")?.value || 1;
 
   const obj = variantId.map((variant) => {
-    return { variantId: variant, quantity: quantity };
+    return { variantId: variant.id, quantity: variant.quantity || quantity };
   });
   const input = {
     input: {

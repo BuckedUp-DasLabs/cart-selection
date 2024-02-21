@@ -134,9 +134,19 @@
       }
       &__info {
         width: 100%;
+        .add-wrapper {
+          display: flex;
+          align-items: center;
+          gap:1rem;
+        }
         &:has(.cart__variants) {
           .add-button {
             margin-top: 0.5rem;
+          }
+        }
+        &:has(.add-wrapper){
+          .add-button{
+            font-size: 0.875rem;
           }
         }
       }
@@ -371,51 +381,51 @@
         border-color: red;
       }
     }
+    .qtty-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      button {
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: #c2c4c7;
+        border-radius: 50%;
+        display: flex;
+        cursor: pointer;
+        transition: 0.3s;
+        &:hover,
+        &:focus {
+          transform: scale(1.1);
+        }
+        &:active {
+          transform: scale(0.9);
+        }
+        svg {
+          fill: white;
+        }
+      }
+      input {
+        max-width: 2rem;
+        border: 1px solid #c2c4c7;
+        border-radius: 3px;
+        font-weight: 700;
+        font-family: Poppins;
+        text-align: center;
+        font-size: 0.8rem;
+        appearance: none;
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+          appearance: none;
+          margin: 0;
+        }
+      }
+    }
     &__foot {
       width: 100%;
       margin-top: auto;
       display: flex;
       align-items: center;
       gap: 1rem;
-      .qtty-wrapper {
-        display: flex;
-        gap: 0.5rem;
-        button {
-          padding: 0;
-          margin: 0;
-          border: none;
-          background: #c2c4c7;
-          border-radius: 50%;
-          display: flex;
-          cursor: pointer;
-          transition: 0.3s;
-          &:hover,
-          &:focus {
-            transform: scale(1.1);
-          }
-          &:active {
-            transform: scale(0.9);
-          }
-          svg {
-            fill: white;
-          }
-        }
-        input {
-          max-width: 2rem;
-          border: 1px solid #c2c4c7;
-          border-radius: 3px;
-          font-weight: 700;
-          font-family: Poppins;
-          text-align: center;
-          font-size: 0.8rem;
-          appearance: none;
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            appearance: none;
-            margin: 0;
-          }
-        }
-      }
     }
     .add-button {
       background: #00bf13;

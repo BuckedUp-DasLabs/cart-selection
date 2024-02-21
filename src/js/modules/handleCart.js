@@ -13,7 +13,7 @@ const createButton = ({ productId, variantId, text, noDrop, variantImg, variantP
     label.appendChild(labelBall);
   }
   label.appendChild(labelText);
-  if(noDrop){
+  if (noDrop) {
     const img = document.createElement("img");
     img.src = variantImg;
     img.alt = text;
@@ -204,6 +204,39 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryVariantsWrapper);
 };
 
+const createQtty = (inputId = undefined) => {
+  const plusBtn = document.createElement("button");
+  plusBtn.classList.add("btn-plus");
+  plusBtn.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
+
+  const minusBtn = document.createElement("button");
+  minusBtn.classList.add("btn-minus");
+  minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
+
+  const qttyInput = document.createElement("input");
+  qttyInput.id = inputId || "cart-qtty-input";
+  qttyInput.value = 1;
+  qttyInput.type = "number";
+  qttyInput.addEventListener("input", () => {
+    if (qttyInput.value <= 0) qttyInput.value = 1;
+  });
+
+  plusBtn.addEventListener("click", () => {
+    qttyInput.value = +qttyInput.value + 1;
+  });
+  minusBtn.addEventListener("click", () => {
+    if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
+  });
+
+  const qttyWrapper = document.createElement("div");
+  qttyWrapper.classList.add("qtty-wrapper");
+  qttyWrapper.appendChild(minusBtn);
+  qttyWrapper.appendChild(qttyInput);
+  qttyWrapper.appendChild(plusBtn);
+  return [qttyWrapper, qttyInput];
+};
+
 const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
@@ -242,15 +275,27 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   }
 
   if (isOrderBump) {
+    const addWrapper = document.createElement("div");
+    addWrapper.classList.add("add-wrapper");
     const addButton = document.createElement("button");
     addButton.classList.add("add-button");
     addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id.split("ob")[0]].price}`;
+    addWrapper.appendChild(addButton);
+    let qttyWrapper, qttyInput;
+    if (prod.hasQtty) {
+      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`);
+      addWrapper.appendChild(qttyWrapper);
+    }
     addButton.addEventListener("click", () => {
-      addButton.remove();
+      addWrapper.remove();
       inCartContainer.appendChild(productWrapper);
+      if (prod.hasQtty && qttyInput.value > 1) {
+        title.innerHTML = `${title.innerHTML} (${qttyInput.value})`;
+        prod.quantity = qttyInput.value;
+      }
       data.push(prod);
     });
-    productInfo.appendChild(addButton);
+    productInfo.appendChild(addWrapper);
   }
 
   return productWrapper;
@@ -309,36 +354,7 @@ const createCart = (data, orderBumpData) => {
   cartFoot.appendChild(buyButton);
 
   if (hasQtty) {
-    const plusBtn = document.createElement("button");
-    plusBtn.classList.add("btn-plus");
-    plusBtn.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
-
-    const minusBtn = document.createElement("button");
-    minusBtn.classList.add("btn-minus");
-    minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
-
-    const qttyInput = document.createElement("input");
-    qttyInput.id = "cart-qtty-input";
-    qttyInput.value = 1;
-    qttyInput.type = "number";
-    qttyInput.addEventListener("input", () => {
-      if (qttyInput.value <= 0) qttyInput.value = 1;
-    });
-
-    plusBtn.addEventListener("click", () => {
-      qttyInput.value = +qttyInput.value + 1;
-    });
-    minusBtn.addEventListener("click", () => {
-      if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
-    });
-
-    const qttyWrapper = document.createElement("div");
-    qttyWrapper.classList.add("qtty-wrapper");
-    qttyWrapper.appendChild(minusBtn);
-    qttyWrapper.appendChild(qttyInput);
-    qttyWrapper.appendChild(plusBtn);
-    cartFoot.appendChild(qttyWrapper);
+    cartFoot.appendChild(createQtty()[0]);
   }
 
   cart.appendChild(cartFoot);
