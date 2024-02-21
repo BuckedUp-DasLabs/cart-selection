@@ -5,8 +5,8 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = [8820417003826, 8858111377714, 8768929825074];
-const orderBumpIds = { 8820417003826: { title: "test", price: 10.99 } };
+const productsID = ["8820417003826-noDrop", 8858111377714, 8768929825074];
+const orderBumpIds = { 8820417003826: { title: "Test", price: 10.99 } };
 const buyButtonsIds = [
   { id: "#BTN-1", products: '{"8820417003826": {"quantity": 1},"8858111377714": {"quantity": 1}}', discountCode: "1boost" },
   { id: "#BTN-2", products: '{"8820417003826": {"quantity": 2},"8858111377714": {"quantity": 1}}', discountCode: "2boost" },

@@ -1,20 +1,27 @@
 import buy from "./buy.js";
 
-const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice = false }) => {
+const createButton = ({ productId, variantId, text, noDrop, variantImg, variantPrice = "", plusPrice = false }) => {
   const wrapper = document.createElement("div");
   const label = document.createElement("label");
   const labelText = document.createElement("span");
-  const labelBall = document.createElement("span");
   const button = document.createElement("input");
   wrapper.appendChild(button);
   wrapper.appendChild(label);
-  label.appendChild(labelBall);
+  if (!noDrop) {
+    const labelBall = document.createElement("span");
+    labelBall.classList.add("label-ball");
+    label.appendChild(labelBall);
+  }
   label.appendChild(labelText);
-  labelBall.appendChild(document.createElement("span"));
+  if(noDrop){
+    const img = document.createElement("img");
+    img.src = variantImg;
+    img.alt = text;
+    label.appendChild(img);
+  }
 
   wrapper.classList.add("button-wrapper");
   labelText.classList.add("label-text");
-  labelBall.classList.add("label-ball");
   label.setAttribute("for", `${productId}-${variantId}`);
   label.setAttribute("role", "button");
   labelText.innerHTML = text;
@@ -57,27 +64,35 @@ const createDropdown = (title) => {
   return dropdown;
 };
 
-const handleSimpleProduct = ({ prod, productInfo, img, isOrderBump }) => {
-  const dropdown = createDropdown(prod.variants[0].title);
+const handleSimpleProduct = ({ prod, productInfo, img, noDrop }) => {
+  let dropdown = undefined;
   const variantsWrapper = document.createElement("div");
-  variantsWrapper.classList.add("cart__dropdown__variants");
-  productInfo.appendChild(dropdown);
+  if (!noDrop) {
+    dropdown = createDropdown(prod.variants[0].title);
+    productInfo.appendChild(dropdown);
+    variantsWrapper.classList.add("cart__dropdown__variants");
+  } else variantsWrapper.classList.add("cart__variants");
   prod.variants.forEach((variant) => {
     const [wrapper, button] = createButton({
       productId: prod.id,
       variantId: variant.id,
       text: variant.title,
       variantPrice: variant.price.amount,
+      variantImg: variant.image.src,
+      noDrop,
     });
     variantsWrapper.appendChild(wrapper);
     variantsWrapper.querySelector("input").checked = true;
     button.addEventListener("change", () => {
-      img.src = variant.image.src;
-      img.alt = variant.title;
-      dropdown.querySelector("p").innerHTML = button.getAttribute("label-text");
+      if (!noDrop) {
+        img.src = variant.image.src;
+        img.alt = variant.title;
+        dropdown.querySelector("p").innerHTML = button.getAttribute("label-text");
+      }
     });
   });
-  dropdown.appendChild(variantsWrapper);
+  if (!noDrop) dropdown.appendChild(variantsWrapper);
+  else productInfo.appendChild(variantsWrapper);
 };
 
 const handleComplexProduct = ({ prod, productInfo, img }) => {
@@ -196,15 +211,6 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   const productInfo = document.createElement("div");
   productInfo.classList.add("cart__product__info");
 
-  const img = document.createElement("img");
-  if (isVariant) {
-    img.src = prod.image.src;
-    img.alt = prod.title;
-  } else {
-    img.src = prod.variants[0].image.src;
-    img.alt = prod.variants[0].title;
-  }
-
   const title = document.createElement("p");
   title.classList.add("cart__product__title");
   title.innerHTML = isVariant || prod.title;
@@ -216,11 +222,23 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     productInfo.appendChild(variantTitle);
   }
 
-  productWrapper.appendChild(img);
+  let img = false;
+  if (!prod.noDrop) {
+    img = document.createElement("img");
+    if (isVariant) {
+      img.src = prod.image.src;
+      img.alt = prod.title;
+    } else {
+      img.src = prod.variants[0].image.src;
+      img.alt = prod.variants[0].title;
+    }
+    productWrapper.appendChild(img);
+  }
+
   productWrapper.appendChild(productInfo);
   if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
-    else handleSimpleProduct({ prod, productInfo, img, isOrderBump });
+    else handleSimpleProduct({ prod, productInfo, img, noDrop: prod.noDrop });
   }
 
   if (isOrderBump) {
@@ -277,6 +295,7 @@ const createCart = (data, orderBumpData) => {
   [cartOverlay, closeCartButton].forEach((el) => {
     el.addEventListener("click", () => {
       cartWrapper.classList.toggle("active");
+      document.body.classList.toggle("no-scroll");
     });
   });
 
@@ -350,6 +369,7 @@ const createCart = (data, orderBumpData) => {
       if (!result) buyButton.toggleAttribute("disabled");
     });
     cartWrapper.classList.toggle("active");
+    document.body.classList.toggle("no-scroll");
   };
 
   return updateCartProducts;

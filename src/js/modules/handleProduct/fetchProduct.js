@@ -1,18 +1,18 @@
 import { apiOptions, fetchUrl } from "../../variables.js";
 
 const filterVariants = (data, ids, isOrderBump) => {
+  const containsNumber = (str) => /\d/.test(str);
   const getVariants = (id) => {
     const idStart = "gid://shopify/ProductVariant/";
-    if (typeof id == "string" && id.includes("-")) {
+    const idsArray = typeof id == "string" ? id.split("-") : false;
+    if (idsArray && containsNumber(id.split("-")[1])) {
       const filteredIds = [];
-      const idsArray = id.split("-");
-      let i = idsArray[1].includes("whole") ? 2 : 1;
-      for (i; i < idsArray.length; i++) {
+      for (let i = 0; i < idsArray.length && containsNumber(idsArray[i]); i++) {
         filteredIds.push(idStart + idsArray[i]);
       }
-      return { ids: filteredIds, isWhole: idsArray[1].includes("whole") };
+      return { ids: filteredIds, isWhole: idsArray.includes("whole"), noDrop: idsArray.includes("noDrop") };
     }
-    return { ids: null };
+    return { ids: null, noDrop: idsArray && idsArray.includes("noDrop"), isWhole: idsArray && idsArray.includes("whole") };
   };
 
   const isNotAvailable = (variant) => variant.node.availableForSale === false;
@@ -35,13 +35,15 @@ const filterVariants = (data, ids, isOrderBump) => {
   ids.forEach((id) => {
     setIsOrderBump(id);
     const variants = getVariants(id);
-    if (variants.ids) {
+    const bumpNoDrop = id in orderBumpIds && orderBumpIds[id].noDrop;
+    if (variants.ids || variants.isWhole || variants.noDrop || bumpNoDrop) {
       const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
-      prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
+      if (variants.noDrop || bumpNoDrop) prod.noDrop = true;
+      if (variants.ids) prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {
         prod.availableForSale = prod.variants.edges.every(isAvailable);
         prod.isWhole = true;
-      } else prod.availableForSale = !prod.variants.edges.every(isNotAvailable);
+      } else if (variants.ids) prod.availableForSale = !prod.variants.edges.every(isNotAvailable);
     }
   });
 };
