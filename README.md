@@ -65,13 +65,17 @@ You can add more than one discountCode by using "-".
 ex: "code1-code2"
 
 You can add a title property to a product in orderBumpIds.
+You can add a hasQuantity property to a product in orderBumpIds.
+You can add a noDrop property to a product in orderBumpIds.
 
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
 ex:
 
 ```
-const productsID = ["999-877","999-877-858",""999-whole-877-858""];
+const productsID = ["999-877","999-877-858",""999-877-858-whole""];
 ```
+
+By adding "noDrop" in the same way, it will be multiple buttons instead of a dropdown.
 
 ## How to compile scss
 
