@@ -39,7 +39,7 @@ const filterVariants = (data, ids, isOrderBump) => {
     const hasQtty = id in orderBumpIds && orderBumpIds[id].hasQtty;
     if (variants.ids || variants.isWhole || variants.noDrop || bumpNoDrop || hasQtty) {
       const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
-      if (hasQtty) prod.hasQtty = true;
+      if (hasQtty) prod.hasQtty = hasQtty;
       if (variants.noDrop || bumpNoDrop) prod.noDrop = true;
       if (variants.ids) prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {

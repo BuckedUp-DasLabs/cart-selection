@@ -204,7 +204,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryVariantsWrapper);
 };
 
-const createQtty = (inputId = undefined) => {
+const createQtty = (inputId = undefined, maxQtty = undefined) => {
   const plusBtn = document.createElement("button");
   plusBtn.classList.add("btn-plus");
   plusBtn.innerHTML =
@@ -220,10 +220,11 @@ const createQtty = (inputId = undefined) => {
   qttyInput.type = "number";
   qttyInput.addEventListener("input", () => {
     if (qttyInput.value <= 0) qttyInput.value = 1;
+    if (maxQtty && qttyInput.value > maxQtty) qttyInput.value = maxQtty;
   });
 
   plusBtn.addEventListener("click", () => {
-    qttyInput.value = +qttyInput.value + 1;
+    if (!maxQtty || qttyInput.value < maxQtty) qttyInput.value = +qttyInput.value + 1;
   });
   minusBtn.addEventListener("click", () => {
     if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
@@ -283,7 +284,8 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     addWrapper.appendChild(addButton);
     let qttyWrapper, qttyInput;
     if (prod.hasQtty) {
-      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`);
+      const maxQtty = typeof prod.hasQtty === "number" ? prod.hasQtty : false;
+      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`, maxQtty);
       addWrapper.appendChild(qttyWrapper);
     }
     addButton.addEventListener("click", () => {
