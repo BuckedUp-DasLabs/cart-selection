@@ -204,7 +204,15 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryVariantsWrapper);
 };
 
-const createQtty = (inputId = undefined, maxQtty = undefined) => {
+const createQtty = (inputId = undefined, maxQtty = undefined, addButton = undefined, price = undefined) => {
+  const updateTitle = (qtty) => {
+    if(price){
+      const separetedString = addButton.innerHTML.split("$");
+      separetedString[1] = (price * qtty).toFixed(2);
+      addButton.innerHTML = separetedString.join("$");
+    }
+  };
+
   const plusBtn = document.createElement("button");
   plusBtn.classList.add("btn-plus");
   plusBtn.innerHTML =
@@ -219,15 +227,27 @@ const createQtty = (inputId = undefined, maxQtty = undefined) => {
   qttyInput.value = 1;
   qttyInput.type = "number";
   qttyInput.addEventListener("input", () => {
-    if (qttyInput.value <= 0) qttyInput.value = 1;
-    if (maxQtty && qttyInput.value > maxQtty) qttyInput.value = maxQtty;
+    if (qttyInput.value <= 0) {
+      qttyInput.value = 1;
+      updateTitle(qttyInput.value);
+    }
+    if (maxQtty && qttyInput.value > maxQtty) {
+      qttyInput.value = maxQtty;
+      updateTitle(qttyInput.value);
+    }
   });
 
   plusBtn.addEventListener("click", () => {
-    if (!maxQtty || qttyInput.value < maxQtty) qttyInput.value = +qttyInput.value + 1;
+    if (!maxQtty || qttyInput.value < maxQtty) {
+      qttyInput.value = +qttyInput.value + 1;
+      updateTitle(qttyInput.value);
+    }
   });
   minusBtn.addEventListener("click", () => {
-    if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
+    if (qttyInput.value > 1) {
+      qttyInput.value = +qttyInput.value - 1;
+      updateTitle(qttyInput.value);
+    }
   });
 
   const qttyWrapper = document.createElement("div");
@@ -280,21 +300,18 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     addWrapper.classList.add("add-wrapper");
     const addButton = document.createElement("button");
     addButton.classList.add("add-button");
-    addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id.split("ob")[0]].price}`;
+    const price = orderBumpIds[prod.id.split("ob")[0]].price
+    addButton.innerHTML = `Add to cart for only +$${price}`;
     addWrapper.appendChild(addButton);
     let qttyWrapper, qttyInput;
     if (prod.hasQtty) {
       const maxQtty = typeof prod.hasQtty === "number" ? prod.hasQtty : false;
-      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`, maxQtty);
+      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`, maxQtty, addButton, price);
       addWrapper.appendChild(qttyWrapper);
     }
     addButton.addEventListener("click", () => {
-      addWrapper.remove();
+      addButton.remove();
       inCartContainer.appendChild(productWrapper);
-      if (prod.hasQtty && qttyInput.value > 1) {
-        title.innerHTML = `${title.innerHTML} (${qttyInput.value})`;
-        prod.quantity = qttyInput.value;
-      }
       data.push(prod);
     });
     productInfo.appendChild(addWrapper);

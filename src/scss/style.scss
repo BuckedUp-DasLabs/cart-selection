@@ -137,15 +137,32 @@
         .add-wrapper {
           display: flex;
           align-items: center;
-          gap:1rem;
+          gap: 1rem;
+          @mixin input-width() {
+            flex-direction: column;
+            gap: 0.5rem;
+            .qtty-wrapper {
+              width: 100%;
+            }
+            input {
+              max-width: unset !important;
+              width: 100% !important;
+            }
+          }
+          &:not(:has(.add-button)) {
+            @include input-width();
+          }
+          @media (max-width: 768px) {
+            @include input-width();
+          }
         }
         &:has(.cart__variants) {
           .add-button {
             margin-top: 0.5rem;
           }
         }
-        &:has(.add-wrapper){
-          .add-button{
+        &:has(.add-wrapper) {
+          .add-button {
             font-size: 0.875rem;
           }
         }
