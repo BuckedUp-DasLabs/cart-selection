@@ -1,11 +1,11 @@
 import buy from "./buy.js";
 
-const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice = false }) => {
+const createInputRadio = ({ productId, variantId, text, variantPrice = "", plusPrice = false }) => {
   const wrapper = document.createElement("div");
   const label = document.createElement("label");
   const labelText = document.createElement("span");
-  const button = document.createElement("input");
-  wrapper.appendChild(button);
+  const input = document.createElement("input");
+  wrapper.appendChild(input);
   wrapper.appendChild(label);
   const labelBall = document.createElement("span");
   labelBall.classList.add("label-ball");
@@ -17,14 +17,14 @@ const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice
   label.setAttribute("for", `${productId}-${variantId}`);
   label.setAttribute("role", "button");
   labelText.innerHTML = text;
-  button.id = `${productId}-${variantId}`;
-  button.value = `${variantId}`;
-  button.type = "radio";
-  button.setAttribute("hidden", "");
+  input.id = `${productId}-${variantId}`;
+  input.value = `${variantId}`;
+  input.type = "radio";
+  input.setAttribute("hidden", "");
 
-  button.name = productId;
-  button.setAttribute("price", variantPrice);
-  button.setAttribute("label-text", text);
+  input.name = productId;
+  input.setAttribute("price", variantPrice);
+  input.setAttribute("label-text", text);
 
   if (plusPrice) {
     const labelPrice = document.createElement("span");
@@ -33,7 +33,22 @@ const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice
     labelText.appendChild(labelPrice);
   }
 
-  return [wrapper, button];
+  return [wrapper, input];
+};
+
+const createButton = (variant) => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.value = variant.id;
+  button.classList.add("cart__variant-button");
+  const title = document.createElement("span");
+  title.innerHTML = variant.title;
+  const img = document.createElement("img");
+  img.src = variant.image.src;
+  img.alt = variant.title;
+  button.appendChild(title);
+  button.appendChild(img);
+  return button;
 };
 
 const createDropdown = (title) => {
@@ -63,7 +78,7 @@ const handleSimpleProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(dropdown);
   variantsWrapper.classList.add("cart__dropdown__variants");
   prod.variants.forEach((variant) => {
-    const [wrapper, button] = createButton({
+    const [wrapper, button] = createInputRadio({
       productId: prod.id,
       variantId: variant.id,
       text: variant.title,
@@ -147,7 +162,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
       const newValue = variant.selectedOptions[1].value;
       const plusPrice = findPlusPrice(newValue, prod.variants);
       if (variant.title.includes(primarySelected) && !secondaryVariantsWrapper.querySelector("label")?.innerHTML.includes(newValue)) {
-        const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: getNewName(newValue), plusPrice: plusPrice });
+        const [wrapper, button] = createInputRadio({ productId: secondaryOption.id, variantId: newValue, text: getNewName(newValue), plusPrice: plusPrice });
         button.addEventListener("change", () => {
           secondaryVariantsWrapper.classList.remove("shake");
         });
@@ -162,7 +177,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   };
 
   primaryOption.values.forEach((option) => {
-    const [wrapper, button] = createButton({
+    const [wrapper, button] = createInputRadio({
       productId: primaryOption.id,
       variantId: option,
       text: option,
@@ -243,9 +258,81 @@ const createQtty = (inputId = undefined, maxQtty = undefined, addButton = undefi
   return [qttyWrapper, qttyInput];
 };
 
+const increasePlaceholders = (prodWrapper) => {
+  const placeHoldersDiv = prodWrapper.querySelector(".cart__placeholders");
+  const placeHolder = placeHoldersDiv.querySelector(".cart__variant-placeholder");
+  placeHoldersDiv.appendChild(placeHolder.cloneNode(true));
+};
+
+const handleOneCardProduct = ({ productInfo }) => {
+  const placeHoldersDiv = document.createElement("div");
+  placeHoldersDiv.classList.add("cart__placeholders");
+  const placeHolder = document.createElement("div");
+  placeHolder.classList.add("cart__variant-placeholder");
+  const title = document.createElement("p");
+  title.innerHTML = "Your Choice";
+  const img = document.createElement("div");
+  placeHolder.appendChild(title);
+  placeHolder.appendChild(img);
+  placeHoldersDiv.appendChild(placeHolder);
+  productInfo.appendChild(placeHoldersDiv);
+};
+
+const createPlaceholders = ({ prod, selectionDiv }) => {
+  selectionDiv = document.createElement("div");
+  selectionDiv.classList.add("cart__variant-selection");
+  const title = document.createElement("p");
+  title.innerHTML = `Select your variants: `;
+  selectionDiv.appendChild(title);
+  const selectionContainer = document.createElement("div");
+  selectionContainer.classList.add("cart__variant-selection__container");
+  selectionDiv.appendChild(selectionContainer);
+  prod.variants.forEach((variant) => {
+    const btn = createButton(variant);
+    selectionContainer.appendChild(btn);
+    btn.addEventListener("click", () => {
+      const prodContainer = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"] .cart__placeholders`);
+      if (btn.parentElement.classList.contains("cart__variant-selection__container")) {
+        const placeholder = prodContainer.querySelector('.cart__variant-placeholder:not([style*="display: none"])');
+        const firstChild = prodContainer.querySelector("*");
+        const clone = btn.cloneNode(true);
+        clone.addEventListener("click",()=>{
+          prodContainer.querySelector('.cart__variant-placeholder[style*="display: none"]').style.display = ""
+          selectionDiv.style.display = ""
+          clone.remove();
+        })
+        prodContainer.insertBefore(clone, firstChild);
+        placeholder.style.display = "none";
+        selectionContainer.classList.remove("shake");
+        if (!prodContainer.querySelector('.cart__variant-placeholder:not([style*="display: none"])')) selectionDiv.style.display = "none";
+      }
+    });
+  });
+  return selectionDiv;
+};
+
 const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
+  const prevProdWrapper = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"]`);
+  let selectionDiv = undefined;
+  if (prod.oneCard && !prevProdWrapper) {
+    selectionDiv = createPlaceholders({
+      prod,
+      selectionDiv,
+    });
+  } else if (prod.oneCard) {
+    increasePlaceholders(prevProdWrapper);
+    return undefined;
+  }
+
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
+  productWrapper.setAttribute("prod-id", prod.id.split("id")[0]);
+
+  const productContainer = document.createElement("div");
+  productContainer.classList.add("cart__product__container");
+
+  productWrapper.appendChild(productContainer);
+  if (selectionDiv) productWrapper.appendChild(selectionDiv);
 
   const productInfo = document.createElement("div");
   productInfo.classList.add("cart__product__info");
@@ -261,20 +348,24 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     productInfo.appendChild(variantTitle);
   }
 
-  const img = document.createElement("img");
-  if (isVariant) {
-    img.src = prod.image.src;
-    img.alt = prod.title;
-  } else {
-    img.src = prod.variants[0].image.src;
-    img.alt = prod.variants[0].title;
+  let img = undefined;
+  if (!prod.oneCard) {
+    img = document.createElement("img");
+    if (isVariant) {
+      img.src = prod.image.src;
+      img.alt = prod.title;
+    } else {
+      img.src = prod.variants[0].image.src;
+      img.alt = prod.variants[0].title;
+    }
+    productContainer.appendChild(img);
   }
-  productWrapper.appendChild(img);
 
-  productWrapper.appendChild(productInfo);
+  productContainer.appendChild(productInfo);
   if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
-    else handleSimpleProduct({ prod, productInfo, img });
+    else if (!prod.oneCard) handleSimpleProduct({ prod, productInfo, img });
+    else handleOneCardProduct({ prod, productInfo });
   }
 
   if (isOrderBump) {
@@ -375,7 +466,10 @@ const createCart = (data, orderBumpData) => {
         prod.variants.forEach((variant) => {
           inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
         });
-      } else inCartContainer.appendChild(createProduct({ prod }));
+      } else {
+        const prodCard = createProduct({ prod });
+        if (prodCard) inCartContainer.appendChild(prodCard);
+      }
     });
     orderBumpData.forEach((prod) => {
       orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));

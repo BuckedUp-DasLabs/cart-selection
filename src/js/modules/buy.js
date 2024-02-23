@@ -104,6 +104,22 @@ const buy = async (data, btnDiscount) => {
           return { id: variant.id };
         })
       );
+    } else if (product.oneCard) {
+      const prodContainer = document.querySelector(`[prod-id="${product.id.split("id")[0]}"]`);
+      const choicesContainer = prodContainer.querySelector(".cart__placeholders");
+      const variantsContainer = prodContainer.querySelector(".cart__variant-selection__container");
+      console.log(choicesContainer);
+      const button = choicesContainer.querySelector("button:not([variantGot])");
+      if (!button) {
+        variantsContainer.classList.add("shake");
+        choicesContainer.querySelectorAll("button").forEach((button) => {
+          button.removeAttribute("variantGot");
+        });
+        alert("Select your variant.");
+        return false;
+      }
+      button.setAttribute("variantGot", "");
+      variantId.push({ id: button.value, quantity });
     } else if (product.variants.length > 1) {
       const selectedVariant = getVariantId(product);
       if (!selectedVariant.result && !selectedVariant.wrapper) {
@@ -126,7 +142,6 @@ const buy = async (data, btnDiscount) => {
   const obj = variantId.map((variant) => {
     return { variantId: variant.id, quantity: variant.quantity || quantity };
   });
-  console.log(obj)
   const input = {
     input: {
       lineItems: [...obj],

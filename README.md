@@ -66,6 +66,7 @@ ex: "code1-code2"
 
 You can add a title property to a product in orderBumpIds.
 You can add a hasQtty property to a product in orderBumpIds, and its value can he true false or any number.
+You can add a oneCard property to a product in orderBumpIds.
 
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
 ex:

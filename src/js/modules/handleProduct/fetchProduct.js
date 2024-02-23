@@ -5,14 +5,15 @@ const filterVariants = (data, ids, isOrderBump) => {
   const getVariants = (id) => {
     const idStart = "gid://shopify/ProductVariant/";
     const idsArray = typeof id == "string" ? id.split("-") : false;
+    const properties = { isWhole: idsArray && idsArray.includes("whole"), oneCard: idsArray && idsArray.includes("oneCard") };
     if (idsArray && containsNumber(id.split("-")[1])) {
       const filteredIds = [];
       for (let i = 0; i < idsArray.length && containsNumber(idsArray[i]); i++) {
         filteredIds.push(idStart + idsArray[i]);
       }
-      return { ids: filteredIds, isWhole: idsArray.includes("whole") };
+      return { ids: filteredIds, ...properties };
     }
-    return { ids: null, isWhole: idsArray && idsArray.includes("whole") };
+    return { ids: null, ...properties };
   };
 
   const isNotAvailable = (variant) => variant.node.availableForSale === false;
@@ -36,9 +37,10 @@ const filterVariants = (data, ids, isOrderBump) => {
     setIsOrderBump(id);
     const variants = getVariants(id);
     const hasQtty = id in orderBumpIds && orderBumpIds[id].hasQtty;
-    if (variants.ids || variants.isWhole || hasQtty) {
+    if (variants.ids || variants.isWhole || variants.oneCard || hasQtty) {
       const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
       if (hasQtty) prod.hasQtty = hasQtty;
+      if (variants.oneCard) prod.oneCard = true;
       if (variants.ids) prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {
         prod.availableForSale = prod.variants.edges.every(isAvailable);
