@@ -10,9 +10,9 @@ const filterVariants = (data, ids, isOrderBump) => {
       for (let i = 0; i < idsArray.length && containsNumber(idsArray[i]); i++) {
         filteredIds.push(idStart + idsArray[i]);
       }
-      return { ids: filteredIds, isWhole: idsArray.includes("whole"), noDrop: idsArray.includes("noDrop") };
+      return { ids: filteredIds, isWhole: idsArray.includes("whole") };
     }
-    return { ids: null, noDrop: idsArray && idsArray.includes("noDrop"), isWhole: idsArray && idsArray.includes("whole") };
+    return { ids: null, isWhole: idsArray && idsArray.includes("whole") };
   };
 
   const isNotAvailable = (variant) => variant.node.availableForSale === false;
@@ -35,12 +35,10 @@ const filterVariants = (data, ids, isOrderBump) => {
   ids.forEach((id) => {
     setIsOrderBump(id);
     const variants = getVariants(id);
-    const bumpNoDrop = id in orderBumpIds && orderBumpIds[id].noDrop;
     const hasQtty = id in orderBumpIds && orderBumpIds[id].hasQtty;
-    if (variants.ids || variants.isWhole || variants.noDrop || bumpNoDrop || hasQtty) {
+    if (variants.ids || variants.isWhole || hasQtty) {
       const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
       if (hasQtty) prod.hasQtty = hasQtty;
-      if (variants.noDrop || bumpNoDrop) prod.noDrop = true;
       if (variants.ids) prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {
         prod.availableForSale = prod.variants.edges.every(isAvailable);

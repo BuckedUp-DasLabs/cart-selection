@@ -66,7 +66,6 @@ ex: "code1-code2"
 
 You can add a title property to a product in orderBumpIds.
 You can add a hasQtty property to a product in orderBumpIds, and its value can he true false or any number.
-You can add a noDrop property to a product in orderBumpIds.
 
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"
 ex:
@@ -74,8 +73,6 @@ ex:
 ```
 const productsID = ["999-877","999-877-858",""999-877-858-whole""];
 ```
-
-By adding "noDrop" in the same way, it will be multiple buttons instead of a dropdown.
 
 ## How to compile scss
 
