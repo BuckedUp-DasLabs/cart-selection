@@ -25,7 +25,7 @@ const setKlaviyo = (name, item, titles) => {
       { ...obj, ...item, products: titles, pagepath: window.location.pathname, pageurl: window.location.href, time: currentTime.getTime() },
     ]);
   } catch (err) {
-    console.log("failed klaviyo\n", err);
+    console.warn("failed klaviyo\n", err);
   }
 };
 

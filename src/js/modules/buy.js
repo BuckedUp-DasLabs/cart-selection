@@ -103,7 +103,7 @@ const startPopsixle = (id) => {
     a10x_dl.unique_checkout_id = id;
     session_sync(a10x_dl.s_id, "unique_checkout_id", a10x_dl.unique_checkout_id);
   } else {
-    console.log("Popsixcle script not found.");
+    console.warn("Popsixcle script not found.");
   }
 };
 
@@ -162,8 +162,10 @@ const buy = async (data, btnDiscount) => {
       body: JSON.stringify(body),
     });
     const apiData = await response.json();
-    console.log(apiData);
-    if (!response.ok) throw new Error("Api Error.");
+    if (!response.ok) {
+      console.warn(apiData);
+      throw new Error("Api Error.");
+    }
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     const bumpDiscount = orderBumpIds[data.find((prod) => prod.id.includes("ob"))?.id.split("ob")[0]]?.discountCode;
     if (discountCode !== "" || btnDiscount || bumpDiscount) {
@@ -195,7 +197,7 @@ const buy = async (data, btnDiscount) => {
     return true;
   } catch (error) {
     alert("There was a problem. Please try again later.");
-    console.log(error);
+    return Promise.reject(error);
   }
 };
 

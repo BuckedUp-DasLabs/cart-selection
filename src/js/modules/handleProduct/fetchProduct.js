@@ -96,14 +96,15 @@ const fetchProduct = async ({ ids, isOrderBump = false }) => {
       body: JSON.stringify({ query: query }),
     });
     let data = await response.json();
-    if (!response.ok) {
+    if (!response.ok || data.data.nodes.some((prod) => prod === null)) {
+      console.warn(data);
       throw new Error("Error Fetching Api.");
     }
     data = data.data.nodes;
     filterVariants(data, ids, isOrderBump);
 
     data.forEach((prod) => {
-      if (!prod.availableForSale) console.log("Out of stock: ", prod.id, prod.title);
+      if (!prod.availableForSale) console.warn("Out of stock: ", prod.id, prod.title);
       prod.id = prod.id.split("/").slice(-1)[0];
 
       prod.variants = prod.variants.edges.filter((edge) => edge.node.availableForSale);
@@ -123,8 +124,7 @@ const fetchProduct = async ({ ids, isOrderBump = false }) => {
     return data;
   } catch (error) {
     alert("Product not found.");
-    console.log(error);
-    return null;
+    return Promise.reject(error);
   }
 };
 

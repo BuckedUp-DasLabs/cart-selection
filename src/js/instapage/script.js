@@ -5,7 +5,7 @@ const urlParamsCookies = ["click_id", "utm_source", "utm_medium", "utm_campaign"
 
 const hasQtty = false;
 
-const productsID = [9037941342514, "8820417003826-oneCard", 8858111377714, 8768929825074];
+const productsID = ["9037941342514", "8820417003826-oneCard", 8858111377714, 8768929825074];
 const orderBumpIds = { 8820417003826: { title: "Test", price: 10.99, hasQtty: 5 } };
 const buyButtonsIds = [
   { id: "#BTN-1", products: '{"8820417003826": {"quantity": 1},"8858111377714": {"quantity": 1}}', discountCode: "1boost" },
