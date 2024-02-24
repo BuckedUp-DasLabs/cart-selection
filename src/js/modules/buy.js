@@ -8,11 +8,25 @@ const getVariantId = (data) => {
     const secondaryWrapper = document.querySelector(`[secondary="${data.id}"]`);
     const primary = primaryWrapper.querySelector("input:checked");
     const secondary = secondaryWrapper.querySelector("input:checked");
-    if (!secondary) return { result: false, wrapper: secondaryWrapper };
+    if (!secondary) return { result: false, wrapper: secondaryWrapper, message: "Select your size." };
     return { result: data.variants.find((variant) => variant.title.includes(primary.value) && variant.title.includes(secondary.value)).id };
+  } else if (data.oneCard) {
+    const prodContainer = document.querySelector(`[prod-id="${data.id.split("id")[0]}"]`);
+    const choicesContainer = prodContainer.querySelector(".cart__placeholders");
+    const variantsContainer = prodContainer.querySelector(".cart__variant-selection__container");
+    const button = choicesContainer.querySelector("button:not([variantGot])");
+    if (!button) {
+      variantsContainer.classList.add("shake");
+      choicesContainer.querySelectorAll("button").forEach((button) => {
+        button.removeAttribute("variantGot");
+      });
+      return { result: false, wrapper: variantsContainer, message: "Select your variants." };
+    }
+    button.setAttribute("variantGot", "");
+    return { result: button.value };
   } else {
     const input = document.querySelector(`[name="${data.id}"]:checked`);
-    if (!input) return { result: false, wrapper: false };
+    if (!input) return { result: false, wrapper: false, message: "Sorry, there was a problem." };
     return { result: input.value };
   }
 };
@@ -104,31 +118,11 @@ const buy = async (data, btnDiscount) => {
           return { id: variant.id };
         })
       );
-    } else if (product.oneCard) {
-      const prodContainer = document.querySelector(`[prod-id="${product.id.split("id")[0]}"]`);
-      const choicesContainer = prodContainer.querySelector(".cart__placeholders");
-      const variantsContainer = prodContainer.querySelector(".cart__variant-selection__container");
-      console.log(choicesContainer);
-      const button = choicesContainer.querySelector("button:not([variantGot])");
-      if (!button) {
-        variantsContainer.classList.add("shake");
-        choicesContainer.querySelectorAll("button").forEach((button) => {
-          button.removeAttribute("variantGot");
-        });
-        alert("Select your variant.");
-        return false;
-      }
-      button.setAttribute("variantGot", "");
-      variantId.push({ id: button.value, quantity });
     } else if (product.variants.length > 1) {
       const selectedVariant = getVariantId(product);
-      if (!selectedVariant.result && !selectedVariant.wrapper) {
-        alert("Sorry, there was a problem.");
-        return false;
-      }
       if (!selectedVariant.result) {
-        selectedVariant.wrapper.classList.add("shake");
-        alert("Select your size.");
+        alert(selectedVariant.message);
+        if (selectedVariant.wrapper) selectedVariant.wrapper.classList.add("shake");
         return false;
       }
       variantId.push({ id: selectedVariant.result, quantity });
