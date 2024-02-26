@@ -1,11 +1,17 @@
 import fetchProduct from "./modules/handleProduct/fetchProduct.js";
 import toggleLoading from "./modules/toggleLoading.js";
 import { dataLayerStart } from "./modules/dataLayer.js";
-import { toggleCart, createCart } from "./modules/handleCart.js";
+import { createCart } from "./modules/handleCart.js";
 
-const buyButton = [];
+const buyButtons = [];
 buyButtonsIds.forEach((id) => {
-  buyButton.push(document.querySelector(id));
+  let buyButton;
+  if (typeof id !== "string") {
+    buyButton = document.querySelector(id.id);
+    id.products && buyButton.setAttribute("products", id.products);
+    id.discountCode && buyButton.setAttribute("discountCode", id.discountCode);
+  } else buyButton = document.querySelector(id);
+  buyButtons.push(buyButton);
 });
 
 const main = async () => {
@@ -18,11 +24,28 @@ const main = async () => {
     window.location.href = "https://buckedup.com";
     return;
   }
-  const cartWrapper = createCart(data, orderBumpData);
-  buyButton.forEach((btn) => {
+  const updateCartProducts = createCart(data, orderBumpData);
+  buyButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
+      let btnData;
+      const btnProducts = JSON.parse(btn.getAttribute("products"));
+      if (btnProducts) {
+        const filteredData = data.filter((prod) => prod.id in btnProducts);
+        const increasedData = [];
+        filteredData.forEach((prod) => {
+          increasedData.push(prod);
+          const quantity = btnProducts[prod.id].quantity;
+          if (quantity > 1) {
+            for (let i = 1; i < quantity; i++) {
+              const copy = { ...prod, id: `${prod.id}id${i}` };
+              increasedData.push(copy);
+            }
+          }
+        });
+        btnData = increasedData;
+      } else btnData = data;
       if (!btn.hasAttribute("disabled")) {
-        toggleCart(cartWrapper);
+        updateCartProducts(btnData, btn.getAttribute("discountCode"));
       }
     });
   });

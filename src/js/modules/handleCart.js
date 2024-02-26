@@ -1,31 +1,30 @@
 import buy from "./buy.js";
 
-const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice = false }) => {
+const createInputRadio = ({ productId, variantId, text, variantPrice = "", plusPrice = false }) => {
   const wrapper = document.createElement("div");
   const label = document.createElement("label");
   const labelText = document.createElement("span");
-  const labelBall = document.createElement("span");
-  const button = document.createElement("input");
-  wrapper.appendChild(button);
+  const input = document.createElement("input");
+  wrapper.appendChild(input);
   wrapper.appendChild(label);
+  const labelBall = document.createElement("span");
+  labelBall.classList.add("label-ball");
   label.appendChild(labelBall);
   label.appendChild(labelText);
-  labelBall.appendChild(document.createElement("span"));
 
   wrapper.classList.add("button-wrapper");
   labelText.classList.add("label-text");
-  labelBall.classList.add("label-ball");
-  label.setAttribute("for", `${variantId}`);
+  label.setAttribute("for", `${productId}-${variantId}`);
   label.setAttribute("role", "button");
   labelText.innerHTML = text;
-  button.id = `${variantId}`;
-  button.value = `${variantId}`;
-  button.type = "radio";
-  button.setAttribute("hidden", "");
+  input.id = `${productId}-${variantId}`;
+  input.value = `${variantId}`;
+  input.type = "radio";
+  input.setAttribute("hidden", "");
 
-  button.name = productId;
-  button.setAttribute("price", variantPrice);
-  button.setAttribute("label-text", text);
+  input.name = productId;
+  input.setAttribute("price", variantPrice);
+  input.setAttribute("label-text", text);
 
   if (plusPrice) {
     const labelPrice = document.createElement("span");
@@ -34,7 +33,22 @@ const createButton = ({ productId, variantId, text, variantPrice = "", plusPrice
     labelText.appendChild(labelPrice);
   }
 
-  return [wrapper, button];
+  return [wrapper, input];
+};
+
+const createButton = (variant) => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.value = variant.id;
+  button.classList.add("cart__variant-button");
+  const title = document.createElement("span");
+  title.innerHTML = variant.title;
+  const img = document.createElement("img");
+  img.src = variant.image.src;
+  img.alt = variant.title;
+  button.appendChild(title);
+  button.appendChild(img);
+  return button;
 };
 
 const createDropdown = (title) => {
@@ -57,15 +71,16 @@ const createDropdown = (title) => {
   return dropdown;
 };
 
-const handleSimpleProduct = ({ prod, productInfo, img, isOrderBump }) => {
-  const dropdown = createDropdown(prod.variants[0].title);
+const handleSimpleProduct = ({ prod, productInfo, img }) => {
+  let dropdown = undefined;
   const variantsWrapper = document.createElement("div");
-  variantsWrapper.classList.add("cart__dropdown__variants");
+  dropdown = createDropdown(prod.variants[0].title);
   productInfo.appendChild(dropdown);
+  variantsWrapper.classList.add("cart__dropdown__variants");
   prod.variants.forEach((variant) => {
-    const [wrapper, button] = createButton({
+    const [wrapper, button] = createInputRadio({
       productId: prod.id,
-      variantId: variant.id + (isOrderBump ? "ob" : ""),
+      variantId: variant.id,
       text: variant.title,
       variantPrice: variant.price.amount,
     });
@@ -147,7 +162,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
       const newValue = variant.selectedOptions[1].value;
       const plusPrice = findPlusPrice(newValue, prod.variants);
       if (variant.title.includes(primarySelected) && !secondaryVariantsWrapper.querySelector("label")?.innerHTML.includes(newValue)) {
-        const [wrapper, button] = createButton({ productId: secondaryOption.id, variantId: newValue, text: getNewName(newValue), plusPrice: plusPrice });
+        const [wrapper, button] = createInputRadio({ productId: secondaryOption.id, variantId: newValue, text: getNewName(newValue), plusPrice: plusPrice });
         button.addEventListener("change", () => {
           secondaryVariantsWrapper.classList.remove("shake");
         });
@@ -162,7 +177,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   };
 
   primaryOption.values.forEach((option) => {
-    const [wrapper, button] = createButton({
+    const [wrapper, button] = createInputRadio({
       productId: primaryOption.id,
       variantId: option,
       text: option,
@@ -189,21 +204,138 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
   productInfo.appendChild(secondaryVariantsWrapper);
 };
 
+const createQtty = (inputId = undefined, maxQtty = undefined, addButton = undefined, price = undefined) => {
+  const updateTitle = (qtty) => {
+    if (price) {
+      const separetedString = addButton.innerHTML.split("$");
+      separetedString[1] = (price * qtty).toFixed(2);
+      addButton.innerHTML = separetedString.join("$");
+    }
+  };
+
+  const plusBtn = document.createElement("button");
+  plusBtn.classList.add("btn-plus");
+  plusBtn.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
+
+  const minusBtn = document.createElement("button");
+  minusBtn.classList.add("btn-minus");
+  minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
+
+  const qttyInput = document.createElement("input");
+  qttyInput.id = inputId || "cart-qtty-input";
+  qttyInput.value = 1;
+  qttyInput.type = "number";
+  qttyInput.addEventListener("input", () => {
+    if (qttyInput.value <= 0) {
+      qttyInput.value = 1;
+      updateTitle(qttyInput.value);
+    }
+    if (maxQtty && qttyInput.value > maxQtty) {
+      qttyInput.value = maxQtty;
+      updateTitle(qttyInput.value);
+    }
+  });
+
+  plusBtn.addEventListener("click", () => {
+    if (!maxQtty || qttyInput.value < maxQtty) {
+      qttyInput.value = +qttyInput.value + 1;
+      updateTitle(qttyInput.value);
+    }
+  });
+  minusBtn.addEventListener("click", () => {
+    if (qttyInput.value > 1) {
+      qttyInput.value = +qttyInput.value - 1;
+      updateTitle(qttyInput.value);
+    }
+  });
+
+  const qttyWrapper = document.createElement("div");
+  qttyWrapper.classList.add("qtty-wrapper");
+  qttyWrapper.appendChild(minusBtn);
+  qttyWrapper.appendChild(qttyInput);
+  qttyWrapper.appendChild(plusBtn);
+  return [qttyWrapper, qttyInput];
+};
+
+const increasePlaceholders = (prodWrapper) => {
+  const placeHoldersDiv = prodWrapper.querySelector(".cart__placeholders");
+  const placeHolder = placeHoldersDiv.querySelector(".cart__variant-placeholder");
+  placeHoldersDiv.appendChild(placeHolder.cloneNode(true));
+};
+
+const handleOneCardProduct = ({ productInfo }) => {
+  const placeHoldersDiv = document.createElement("div");
+  placeHoldersDiv.classList.add("cart__placeholders");
+  const placeHolder = document.createElement("div");
+  placeHolder.classList.add("cart__variant-placeholder");
+  const title = document.createElement("p");
+  title.innerHTML = "Your Choice";
+  const img = document.createElement("div");
+  placeHolder.appendChild(title);
+  placeHolder.appendChild(img);
+  placeHoldersDiv.appendChild(placeHolder);
+  productInfo.appendChild(placeHoldersDiv);
+};
+
+const createPlaceholders = ({ prod, selectionDiv }) => {
+  selectionDiv = document.createElement("div");
+  selectionDiv.classList.add("cart__variant-selection");
+  const title = document.createElement("p");
+  title.innerHTML = `Select your variants: `;
+  selectionDiv.appendChild(title);
+  const selectionContainer = document.createElement("div");
+  selectionContainer.classList.add("cart__variant-selection__container");
+  selectionDiv.appendChild(selectionContainer);
+  prod.variants.forEach((variant) => {
+    const btn = createButton(variant);
+    selectionContainer.appendChild(btn);
+    btn.addEventListener("click", () => {
+      const prodContainer = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"] .cart__placeholders`);
+      if (btn.parentElement.classList.contains("cart__variant-selection__container")) {
+        const placeholder = prodContainer.querySelector('.cart__variant-placeholder:not([style*="display: none"])');
+        const firstChild = prodContainer.querySelector("*");
+        const clone = btn.cloneNode(true);
+        clone.addEventListener("click",()=>{
+          prodContainer.querySelector('.cart__variant-placeholder[style*="display: none"]').style.display = ""
+          selectionDiv.style.display = ""
+          clone.remove();
+        })
+        prodContainer.insertBefore(clone, firstChild);
+        placeholder.style.display = "none";
+        selectionContainer.classList.remove("shake");
+        if (!prodContainer.querySelector('.cart__variant-placeholder:not([style*="display: none"])')) selectionDiv.style.display = "none";
+      }
+    });
+  });
+  return selectionDiv;
+};
+
 const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
+  const prevProdWrapper = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"]`);
+  let selectionDiv = undefined;
+  if (prod.oneCard && !prevProdWrapper) {
+    selectionDiv = createPlaceholders({
+      prod,
+      selectionDiv,
+    });
+  } else if (prod.oneCard) {
+    increasePlaceholders(prevProdWrapper);
+    return undefined;
+  }
+
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
+  productWrapper.setAttribute("prod-id", prod.id.split("id")[0]);
+
+  const productContainer = document.createElement("div");
+  productContainer.classList.add("cart__product__container");
+
+  productWrapper.appendChild(productContainer);
+  if (selectionDiv) productWrapper.appendChild(selectionDiv);
 
   const productInfo = document.createElement("div");
   productInfo.classList.add("cart__product__info");
-
-  const img = document.createElement("img");
-  if (isVariant) {
-    img.src = prod.image.src;
-    img.alt = prod.title;
-  } else {
-    img.src = prod.variants[0].image.src;
-    img.alt = prod.variants[0].title;
-  }
 
   const title = document.createElement("p");
   title.classList.add("cart__product__title");
@@ -216,23 +348,46 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     productInfo.appendChild(variantTitle);
   }
 
-  productWrapper.appendChild(img);
-  productWrapper.appendChild(productInfo);
+  let img = undefined;
+  if (!prod.oneCard) {
+    img = document.createElement("img");
+    if (isVariant) {
+      img.src = prod.image.src;
+      img.alt = prod.title;
+    } else {
+      img.src = prod.variants[0].image.src;
+      img.alt = prod.variants[0].title;
+    }
+    productContainer.appendChild(img);
+  }
+
+  productContainer.appendChild(productInfo);
   if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
-    else handleSimpleProduct({ prod, productInfo, img, isOrderBump });
+    else if (!prod.oneCard) handleSimpleProduct({ prod, productInfo, img });
+    else handleOneCardProduct({ prod, productInfo });
   }
 
   if (isOrderBump) {
+    const addWrapper = document.createElement("div");
+    addWrapper.classList.add("add-wrapper");
     const addButton = document.createElement("button");
     addButton.classList.add("add-button");
-    addButton.innerHTML = `Add to cart for only +$${orderBumpIds[prod.id.split("ob")[0]].price}`;
+    const price = orderBumpIds[prod.id.split("ob")[0]].price;
+    addButton.innerHTML = `Add to cart for only +$${price}`;
+    addWrapper.appendChild(addButton);
+    let qttyWrapper, qttyInput;
+    if (prod.hasQtty) {
+      const maxQtty = typeof prod.hasQtty === "number" ? prod.hasQtty : false;
+      [qttyWrapper, qttyInput] = createQtty(`qtty-${prod.id}`, maxQtty, addButton, price);
+      addWrapper.appendChild(qttyWrapper);
+    }
     addButton.addEventListener("click", () => {
       addButton.remove();
       inCartContainer.appendChild(productWrapper);
       data.push(prod);
     });
-    productInfo.appendChild(addButton);
+    productInfo.appendChild(addWrapper);
   }
 
   return productWrapper;
@@ -276,75 +431,59 @@ const createCart = (data, orderBumpData) => {
 
   [cartOverlay, closeCartButton].forEach((el) => {
     el.addEventListener("click", () => {
-      toggleCart(cartWrapper);
+      cartWrapper.classList.toggle("active");
+      document.body.classList.toggle("no-scroll");
     });
-  });
-
-  data.forEach((prod) => {
-    if (prod.isWhole) {
-      prod.variants.forEach((variant) => {
-        inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
-      });
-    } else inCartContainer.appendChild(createProduct({ prod }));
-  });
-  orderBumpData.forEach((prod) => {
-    orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
   });
 
   const cartFoot = document.createElement("div");
   cartFoot.classList.add("cart__foot");
 
-  const buyButton = document.createElement("button");
+  let buyButton = document.createElement("button");
   buyButton.classList.add("buy-button");
   buyButton.innerHTML = "BUY NOW";
-  buyButton.addEventListener("click", () => {
-    buyButton.toggleAttribute("disabled");
-    buy(data, buyButton);
-  });
 
   cartFoot.appendChild(buyButton);
 
   if (hasQtty) {
-    const plusBtn = document.createElement("button");
-    plusBtn.classList.add("btn-plus");
-    plusBtn.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>';
-
-    const minusBtn = document.createElement("button");
-    minusBtn.classList.add("btn-minus");
-    minusBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-440v-80h560v80H200Z"/></svg>';
-
-    const qttyInput = document.createElement("input");
-    qttyInput.id = "cart-qtty-input";
-    qttyInput.value = 1;
-    qttyInput.type = "number";
-    qttyInput.addEventListener("input", () => {
-      if (qttyInput.value <= 0) qttyInput.value = 1;
-    });
-
-    plusBtn.addEventListener("click", () => {
-      qttyInput.value = +qttyInput.value + 1;
-    });
-    minusBtn.addEventListener("click", () => {
-      if (qttyInput.value > 1) qttyInput.value = +qttyInput.value - 1;
-    });
-
-    const qttyWrapper = document.createElement("div");
-    qttyWrapper.classList.add("qtty-wrapper");
-    qttyWrapper.appendChild(minusBtn);
-    qttyWrapper.appendChild(qttyInput);
-    qttyWrapper.appendChild(plusBtn);
-    cartFoot.appendChild(qttyWrapper);
+    cartFoot.appendChild(createQtty()[0]);
   }
 
   cart.appendChild(cartFoot);
 
-  return cartWrapper;
+  const replaceElement = (el) => {
+    const elClone = el.cloneNode(true);
+    el.parentNode.replaceChild(elClone, el);
+    return elClone;
+  };
+
+  const updateCartProducts = (data, btnDiscount) => {
+    inCartContainer.innerHTML = "";
+    orderBumpsContainer.innerHTML = "";
+    buyButton = replaceElement(buyButton);
+    data.forEach((prod) => {
+      if (prod.isWhole) {
+        prod.variants.forEach((variant) => {
+          inCartContainer.appendChild(createProduct({ prod: variant, isVariant: prod.title }));
+        });
+      } else {
+        const prodCard = createProduct({ prod });
+        if (prodCard) inCartContainer.appendChild(prodCard);
+      }
+    });
+    orderBumpData.forEach((prod) => {
+      orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
+    });
+    buyButton.addEventListener("click", async () => {
+      buyButton.toggleAttribute("disabled");
+      const result = await buy(data, btnDiscount);
+      if (!result) buyButton.toggleAttribute("disabled");
+    });
+    cartWrapper.classList.toggle("active");
+    document.body.classList.toggle("no-scroll");
+  };
+
+  return updateCartProducts;
 };
 
-const toggleCart = (cartWrapper) => {
-  cartWrapper.classList.toggle("active");
-  document.body.classList.toggle("no-scroll");
-};
-
-export { toggleCart, createCart };
+export { createCart };

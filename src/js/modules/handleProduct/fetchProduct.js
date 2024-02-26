@@ -1,18 +1,19 @@
 import { apiOptions, fetchUrl } from "../../variables.js";
 
 const filterVariants = (data, ids, isOrderBump) => {
+  const containsNumber = (str) => /\d/.test(str);
   const getVariants = (id) => {
     const idStart = "gid://shopify/ProductVariant/";
-    if (typeof id == "string" && id.includes("-")) {
+    const idsArray = typeof id == "string" ? id.split("-") : false;
+    const properties = { isWhole: idsArray && idsArray.includes("whole"), oneCard: idsArray && idsArray.includes("oneCard") };
+    if (idsArray && containsNumber(id.split("-")[1])) {
       const filteredIds = [];
-      const idsArray = id.split("-");
-      let i = idsArray[1].includes("whole") ? 2 : 1;
-      for (i; i < idsArray.length; i++) {
+      for (let i = 0; i < idsArray.length && containsNumber(idsArray[i]); i++) {
         filteredIds.push(idStart + idsArray[i]);
       }
-      return { ids: filteredIds, isWhole: idsArray[1].includes("whole") };
+      return { ids: filteredIds, ...properties };
     }
-    return { ids: null };
+    return { ids: null, ...properties };
   };
 
   const isNotAvailable = (variant) => variant.node.availableForSale === false;
@@ -35,13 +36,16 @@ const filterVariants = (data, ids, isOrderBump) => {
   ids.forEach((id) => {
     setIsOrderBump(id);
     const variants = getVariants(id);
-    if (variants.ids) {
+    const hasQtty = id in orderBumpIds && orderBumpIds[id].hasQtty;
+    if (variants.ids || variants.isWhole || variants.oneCard || hasQtty) {
       const prod = data.find((prod) => prod.id.includes(id.split("-")[0]));
-      prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
+      if (hasQtty) prod.hasQtty = hasQtty;
+      if (variants.oneCard) prod.oneCard = true;
+      if (variants.ids) prod.variants.edges = prod.variants.edges.filter((filteredVariant) => variants.ids.includes(filteredVariant.node.id));
       if (variants.isWhole) {
         prod.availableForSale = prod.variants.edges.every(isAvailable);
         prod.isWhole = true;
-      } else prod.availableForSale = !prod.variants.edges.every(isNotAvailable);
+      } else if (variants.ids) prod.availableForSale = !prod.variants.edges.every(isNotAvailable);
     }
   });
 };
@@ -92,14 +96,15 @@ const fetchProduct = async ({ ids, isOrderBump = false }) => {
       body: JSON.stringify({ query: query }),
     });
     let data = await response.json();
-    if (!response.ok) {
+    if (!response.ok || data.data.nodes.some((prod) => prod === null)) {
+      console.warn(data);
       throw new Error("Error Fetching Api.");
     }
     data = data.data.nodes;
     filterVariants(data, ids, isOrderBump);
 
     data.forEach((prod) => {
-      if (!prod.availableForSale) console.log("Out of stock: ", prod.id, prod.title);
+      if (!prod.availableForSale) console.warn("Out of stock: ", prod.id, prod.title);
       prod.id = prod.id.split("/").slice(-1)[0];
 
       prod.variants = prod.variants.edges.filter((edge) => edge.node.availableForSale);
@@ -119,8 +124,7 @@ const fetchProduct = async ({ ids, isOrderBump = false }) => {
     return data;
   } catch (error) {
     alert("Product not found.");
-    console.log(error);
-    return null;
+    return Promise.reject(error);
   }
 };
 
