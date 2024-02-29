@@ -166,7 +166,7 @@ const handleComplexProduct = ({ prod, productInfo, img }) => {
         button.addEventListener("change", () => {
           secondaryVariantsWrapper.classList.remove("shake");
         });
-        if (prevSelected?.id === newValue) {
+        if (prevSelected?.value === newValue) {
           button.checked = true;
         }
         const placeholder = placeHolders.find((placeHolder) => placeHolder.querySelector(`[size="${getNewName(newValue)}"]`));
