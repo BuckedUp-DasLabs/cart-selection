@@ -168,7 +168,8 @@ const buy = async (data, btnDiscount) => {
     }
     const checkoutId = apiData.data.checkoutCreate.checkout.id;
     const bumpDiscount = orderBumpIds[data.find((prod) => prod.id.includes("ob"))?.id.split("ob")[0]]?.discountCode;
-    if (discountCode !== "" || btnDiscount || bumpDiscount) {
+    const urlDiscount = urlParams.get("discount");
+    if (discountCode !== "" || btnDiscount || bumpDiscount || urlDiscount) {
       let discount;
       if (discountCode || btnDiscount) {
         discount = btnDiscount || discountCode;
@@ -176,6 +177,7 @@ const buy = async (data, btnDiscount) => {
           discount = `${discount}-${bumpDiscount}`;
         }
       } else discount = bumpDiscount;
+      if (urlDiscount) discount = discount ? discount + `-${urlDiscount}` : urlDiscount;
       const responseDiscount = await addDiscount(checkoutId, discount);
       if (!responseDiscount.ok) throw new Error("Api Discount Error.");
     }
