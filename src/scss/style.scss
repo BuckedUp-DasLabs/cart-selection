@@ -108,6 +108,12 @@
     &__order-bumps-container:has(div) {
       padding-top: 1rem;
       border-top: 1px solid black;
+      &.at-top{
+        padding-top: 0;
+        border-top: none;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid black;
+      }
     }
     &__product {
       padding: 1rem;

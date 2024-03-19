@@ -63,8 +63,10 @@
 
 You can add more than one discountCode by using "-".
 ex: "code1-code2"
+You can use a discount param on the url instead of the discountCode.
 
 You can add a title property to a product in orderBumpIds.
+You can add a inTop property to a product in orderBumpIds.
 You can add a hasQtty property to a product in orderBumpIds, and its value can he true false or any number.
 
 You can specify the variants you want from a product (or variant) by typing "id-variantId", and if every variant should go to the checkout using "whole"

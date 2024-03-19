@@ -425,8 +425,15 @@ const createCart = (data, orderBumpData) => {
   productsContainer.classList.add("cart__prod-container");
   inCartContainer.classList.add("cart__in-cart-container");
   orderBumpsContainer.classList.add("cart__order-bumps-container");
-  productsContainer.appendChild(inCartContainer);
-  productsContainer.appendChild(orderBumpsContainer);
+  const bumpAtTop = Object.keys(orderBumpIds).some(id => orderBumpIds[id].inTop);
+  if(bumpAtTop){
+    orderBumpsContainer.classList.add("at-top")
+    productsContainer.appendChild(orderBumpsContainer);
+    productsContainer.appendChild(inCartContainer);
+  }else{
+    productsContainer.appendChild(inCartContainer);
+    productsContainer.appendChild(orderBumpsContainer);
+  }
   cart.appendChild(productsContainer);
 
   [cartOverlay, closeCartButton].forEach((el) => {
