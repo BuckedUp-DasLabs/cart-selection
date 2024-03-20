@@ -78,6 +78,28 @@ const productsID = ["999-877","999-877-858",""999-877-858-whole""];
 
 You can also add a oneCard property like that.
 
+You can add how much you want from the product depending on the button, the discountCode and the products you want from the specific button. Ex: 
+
+```
+const buyButtonsIds = [
+  {
+    id: "#BTN-1",
+    products: '{"999": {"quantity": 1},"998": {"quantity": 1}}',
+    discountCode: "code1",
+  },
+  {
+    id: "#BTN-2",
+    products: '{"997": {"quantity": 2},"996": {"quantity": 1}}',
+    discountCode: "code2",
+  },
+  {
+    id: "#BTN-3",
+    products: '{"999": {"quantity": 1}, "998": {"quantity": 4},"997": {"quantity": 1}, "996": {"quantity": 1}}',
+    discountCode: "code3",
+  },
+];
+```
+
 ## How to compile scss
 
 ### either install the compiler from the sass website, or install the vscode extension live sass compiler.
