@@ -51,6 +51,7 @@ const filterVariants = (data, ids, isOrderBump) => {
 };
 
 const fetchProduct = async ({ ids, isOrderBump = false }) => {
+  if(isOrderBump && "increase" in orderBumpIds) return ["increase"]
   const query = `
   { 
     nodes(ids: [${ids.map((id) => `"gid://shopify/Product/${id}"`)}]) {

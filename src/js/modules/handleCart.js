@@ -312,7 +312,8 @@ const createPlaceholders = ({ prod, selectionDiv }) => {
 };
 
 const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
-  const prevProdWrapper = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"]`);
+  let prevProdWrapper;
+  if (prod !== "increase") prevProdWrapper = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"]`);
   let selectionDiv = undefined;
   if (prod.oneCard && !prevProdWrapper) {
     selectionDiv = createPlaceholders({
@@ -326,7 +327,7 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
 
   const productWrapper = document.createElement("div");
   productWrapper.classList.add("cart__product");
-  productWrapper.setAttribute("prod-id", prod.id.split("id")[0]);
+  if (prod !== "increase") productWrapper.setAttribute("prod-id", prod.id.split("id")[0]);
 
   const productContainer = document.createElement("div");
   productContainer.classList.add("cart__product__container");
@@ -339,7 +340,7 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
 
   const title = document.createElement("p");
   title.classList.add("cart__product__title");
-  title.innerHTML = isVariant || prod.title;
+  title.innerHTML = isVariant || prod.title || orderBumpIds[prod].title;
   productInfo.appendChild(title);
   if (isVariant) {
     const variantTitle = document.createElement("p");
@@ -349,7 +350,7 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   }
 
   let img = undefined;
-  if (!prod.oneCard) {
+  if (!prod.oneCard && prod !== "increase") {
     img = document.createElement("img");
     if (isVariant) {
       img.src = prod.image.src;
@@ -362,7 +363,7 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   }
 
   productContainer.appendChild(productInfo);
-  if (!isVariant && prod.variants.length > 1 && !prod.isWhole) {
+  if (prod !== "increase" && !isVariant && prod.variants.length > 1 && !prod.isWhole) {
     if (prod.options.length > 1) handleComplexProduct({ prod, productInfo, img });
     else if (!prod.oneCard) handleSimpleProduct({ prod, productInfo, img });
     else handleOneCardProduct({ prod, productInfo });
@@ -373,19 +374,29 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
     addWrapper.classList.add("add-wrapper");
     const addButton = document.createElement("button");
     addButton.classList.add("add-button");
-    const price = orderBumpIds[prod.id.split("ob")[0]].price;
+    const price = orderBumpIds[prod]?.price || orderBumpIds[prod.id.split("ob")[0]].price;
     addButton.innerHTML = `Add to cart for only +$${price}`;
     addWrapper.appendChild(addButton);
     let qttyWrapper, qttyInput;
     if (prod.hasQtty) {
       const maxQtty = typeof prod.hasQtty === "number" ? prod.hasQtty : false;
-      [qttyWrapper, qttyInput] = createQtty({inputId: `qtty-${prod.id}`, maxQtty, addButton, price});
+      [qttyWrapper, qttyInput] = createQtty({ inputId: `qtty-${prod.id}`, maxQtty, addButton, price });
       addWrapper.appendChild(qttyWrapper);
     }
     addButton.addEventListener("click", () => {
-      addButton.remove();
-      inCartContainer.appendChild(productWrapper);
-      data.push(prod);
+      if (prod === "increase") {
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.value = orderBumpIds[prod].quantity;
+        hiddenInput.id = "cart-qtty-input";
+        addButton.remove();
+        inCartContainer.appendChild(productWrapper);
+        document.body.appendChild(hiddenInput);
+      } else {
+        addButton.remove();
+        inCartContainer.appendChild(productWrapper);
+        data.push(prod);
+      }
     });
     productInfo.appendChild(addWrapper);
   }
@@ -453,7 +464,7 @@ const createCart = (data, orderBumpData) => {
   cartFoot.appendChild(buyButton);
 
   if (hasQtty) {
-    cartFoot.appendChild(createQtty({maxQtty: hasQtty > 1 ? hasQtty : undefined})[0]);
+    cartFoot.appendChild(createQtty({ maxQtty: hasQtty > 1 ? hasQtty : undefined })[0]);
   }
 
   cart.appendChild(cartFoot);
