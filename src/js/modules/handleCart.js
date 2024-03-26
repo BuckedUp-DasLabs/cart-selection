@@ -350,14 +350,19 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
   }
 
   let img = undefined;
-  if (!prod.oneCard && prod !== "increase") {
+  if (!prod.oneCard) {
     img = document.createElement("img");
     if (isVariant) {
       img.src = prod.image.src;
       img.alt = prod.title;
     } else {
-      img.src = prod.variants[0].image.src;
-      img.alt = prod.variants[0].title;
+      if(prod !== "increase"){
+        img.src = prod.variants[0].image.src;
+        img.alt = prod.variants[0].title;
+      }
+      else{
+        img.src = orderBumpIds[prod].image;
+      }
     }
     productContainer.appendChild(img);
   }
