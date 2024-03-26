@@ -108,7 +108,7 @@
     &__order-bumps-container:has(div) {
       padding-top: 1rem;
       border-top: 1px solid black;
-      &.at-top{
+      &.at-top {
         padding-top: 0;
         border-top: none;
         margin-bottom: 1rem;
@@ -129,6 +129,14 @@
         align-items: flex-start;
         width: 100%;
         gap: 1rem;
+        &:not(:has(.cart__product__info .cart__dropdown)) {
+          &:not(:has(.cart__product__info .add-button)) {
+            align-items: center;
+            .cart__product__title {
+              margin: 0;
+            }
+          }
+        }
       }
       &:has(.variant-selection) .cart__product__container {
         margin-bottom: 0.5rem;
@@ -182,10 +190,13 @@
       &__variant-title {
         font-weight: 700;
         font-size: 1rem;
+      }
+      &__title {
         margin-bottom: 0.5rem;
       }
       &__variant-title {
         color: rgb(88, 88, 88);
+        margin-top: 0.5rem;
       }
       // &:not(:has(.cart__dropdown)){
       //   .cart__product__title{
@@ -316,7 +327,8 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    &__variant-selection button, &__placeholders button{
+    &__variant-selection button,
+    &__placeholders button {
       cursor: pointer;
       img {
         width: 100%;
@@ -328,7 +340,7 @@
     &__variant-selection {
       &__container {
         display: grid;
-        grid-template-columns: repeat(4,1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 0.3125rem;
       }
       p {
@@ -479,7 +491,7 @@
     }
     .add-button {
       background: #00bf13;
-      &.bump-added{
+      &.bump-added {
         background-color: #435ebe;
       }
     }
@@ -509,7 +521,8 @@
   }
 }
 
-.shake label, .shake button {
+.shake label,
+.shake button {
   animation: 0.3s forwards tilt-shaking;
   background-color: #ffe3e3;
   border-color: #ff2321 !important;
