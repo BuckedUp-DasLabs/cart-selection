@@ -311,7 +311,7 @@ const createPlaceholders = ({ prod, selectionDiv }) => {
   return selectionDiv;
 };
 
-const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartContainer = undefined, data = undefined }) => {
+const createProduct = ({ prod, isVariant = false, isOrderBump = false, orderBumpsContainer = undefined, inCartContainer = undefined, data = undefined }) => {
   let prevProdWrapper;
   if (prod !== "increase") prevProdWrapper = document.querySelector(`[prod-id="${prod.id.split("id")[0]}"]`);
   let selectionDiv = undefined;
@@ -356,11 +356,10 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
       img.src = prod.image.src;
       img.alt = prod.title;
     } else {
-      if(prod !== "increase"){
+      if (prod !== "increase") {
         img.src = prod.variants[0].image.src;
         img.alt = prod.variants[0].title;
-      }
-      else{
+      } else {
         img.src = orderBumpIds[prod].image;
       }
     }
@@ -389,18 +388,28 @@ const createProduct = ({ prod, isVariant = false, isOrderBump = false, inCartCon
       addWrapper.appendChild(qttyWrapper);
     }
     addButton.addEventListener("click", () => {
-      if (prod === "increase") {
-        const hiddenInput = document.createElement("input");
-        hiddenInput.type = "hidden";
-        hiddenInput.value = orderBumpIds[prod].quantity;
-        hiddenInput.id = "cart-qtty-input";
-        addButton.remove();
-        inCartContainer.appendChild(productWrapper);
-        document.body.appendChild(hiddenInput);
+      if (addButton.classList.contains("bump-added")) {
+        addButton.classList.remove("bump-added");
+        addButton.innerHTML = `Add to cart for only +$${price}`;
+        orderBumpsContainer.appendChild(productWrapper);
+        if (prod === "increase") {
+          document.getElementById("cart-qtty-input").remove();
+        } else {
+          data.splice(data.indexOf(prod), 1);
+        }
       } else {
-        addButton.remove();
+        if (prod === "increase") {
+          const hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+          hiddenInput.value = orderBumpIds[prod].quantity;
+          hiddenInput.id = "cart-qtty-input";
+          document.body.appendChild(hiddenInput);
+        } else {
+          data.push(prod);
+        }
+        addButton.classList.add("bump-added");
+        addButton.innerHTML = "Added to card";
         inCartContainer.appendChild(productWrapper);
-        data.push(prod);
       }
     });
     productInfo.appendChild(addWrapper);
@@ -495,7 +504,7 @@ const createCart = (data, orderBumpData) => {
       }
     });
     orderBumpData.forEach((prod) => {
-      orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, data }));
+      orderBumpsContainer.appendChild(createProduct({ prod, isOrderBump: true, inCartContainer, orderBumpsContainer, data }));
     });
     buyButton.addEventListener("click", async () => {
       buyButton.toggleAttribute("disabled");

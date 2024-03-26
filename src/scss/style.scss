@@ -1,13 +1,13 @@
-@import "./reset";
-* {
-  box-sizing: border-box;
-}
+// @import "./reset";
+// * {
+//   box-sizing: border-box;
+// }
 
-:root {
-  --primary: #0038ff;
-  --secondary: #e3f5ff;
-  --text-color: black;
-}
+// :root {
+//   --primary: #0038ff;
+//   --secondary: #e3f5ff;
+//   --text-color: black;
+// }
 @import "./loading-screen";
 
 .no-scroll {
@@ -479,6 +479,9 @@
     }
     .add-button {
       background: #00bf13;
+      &.bump-added{
+        background-color: #435ebe;
+      }
     }
     .buy-button {
       background: #435ebe;
